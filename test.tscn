@@ -45,6 +45,7 @@ CameraPivotPath = NodePath("CameraPivot")
 CameraPath = NodePath("CameraPivot/Camera3D")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Player"]
+cast_shadow = 3
 mesh = SubResource("CapsuleMesh_mf4mk")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
@@ -55,6 +56,7 @@ shape = SubResource("CapsuleShape3D_37kl0")
 [node name="Camera3D" type="Camera3D" parent="Player/CameraPivot"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.51074, 0)
 fov = 105.5
+near = 0.2
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_6uqi0")

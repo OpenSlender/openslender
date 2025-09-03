@@ -1,81 +1,163 @@
 using Godot;
-using System;
+using OpenSlender.States;
 
-public partial class Player : CharacterBody3D
+namespace OpenSlender
 {
-	[Export] public NodePath CameraPivotPath { get; set; }
-	[Export] public NodePath CameraPath { get; set; }
+    public partial class Player : CharacterBody3D
+    {
+        [Export] public NodePath CameraPivotPath { get; set; }
+        [Export] public NodePath CameraPath { get; set; }
 
-	public const float Speed = 5.0f;
-	public const float JumpVelocity = 4.5f;
-	public const float MouseSensitivity = 0.25f;
+        public const float Speed = 5.0f;
+        public const float RunSpeed = 8.0f;
+        public const float JumpVelocity = 4.5f;
+        public const float MouseSensitivity = 0.25f;
 
-	private Node3D _cameraPivot;
-	private Camera3D _camera;
+        private Node3D _cameraPivot;
+        private Camera3D _camera;
+        private float _pitch = 0f;
 
-	private float _pitch = 0f;
+        public StateMachine StateMachine { get; private set; }
 
-	public override void _Ready()
-	{
-		_cameraPivot = GetNode<Node3D>(CameraPivotPath);
-		_camera = GetNode<Camera3D>(CameraPath);
-		// Hide and capture the cursor
-		Input.MouseMode = Input.MouseModeEnum.Captured;
-	}
+        private DebugStateOverlay _debugOverlay;
+        private CanvasLayer _debugCanvasLayer;
 
-	public override void _Input(InputEvent @event)
-	{
-		// Release cursor on pressing Escape
-		if (Input.IsActionJustPressed("ui_cancel"))
-		{
-			Input.MouseMode = Input.MouseModeEnum.Visible;
-		}
+        public override void _Ready()
+        {
+            AddToGroup("player");
 
-		if (@event is InputEventMouseMotion mouseMotion)
-		{
-			// Horizontal rotation (rotates the player body)
-			RotateY(Mathf.DegToRad(-mouseMotion.Relative.X * MouseSensitivity));
+            _cameraPivot = GetNode<Node3D>(CameraPivotPath);
+            _camera = GetNode<Camera3D>(CameraPath);
+            Input.MouseMode = Input.MouseModeEnum.Captured;
 
-			// Vertical rotation (rotates the camera pivot)
-			_pitch -= mouseMotion.Relative.Y * MouseSensitivity;
-			_pitch = Mathf.Clamp(_pitch, -80f, 80f);
-			_cameraPivot.RotationDegrees = new Vector3(_pitch, 0, 0);
-		}
-	}
+            InitializeStateMachine();
 
-	public override void _PhysicsProcess(double delta)
-	{
-		Vector3 velocity = Velocity;
+            // Defer debug overlay creation to avoid scene tree conflicts
+            CallDeferred(nameof(InitializeDebugOverlay));
+        }
 
-		// Add the gravity.
-		if (!IsOnFloor())
-		{
-			// In C#, you need to get gravity from ProjectSettings differently
-			velocity.Y -= (float)ProjectSettings.GetSetting("physics/3d/default_gravity") * (float)delta;
-		}
+        private void InitializeStateMachine()
+        {
+            StateMachine = new StateMachine();
+            AddChild(StateMachine);
 
-		// Handle Jump.
-		if (Input.IsActionJustPressed("ui_accept") && IsOnFloor())
-		{
-			velocity.Y = JumpVelocity;
-		}
+            StateMachine.AddState("Idle", new IdleState());
+            StateMachine.AddState("Walking", new WalkingState());
+            StateMachine.AddState("Running", new RunningState());
+            StateMachine.AddState("Jumping", new JumpingState());
+            StateMachine.AddState("Falling", new FallingState());
+            StateMachine.AddState("Landing", new LandingState());
 
-		// Get the input direction and handle the movement/deceleration.
-		// As good practice, you should replace UI actions with custom gameplay actions.
-		Vector2 inputDir = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
-		Vector3 direction = (Transform.Basis * new Vector3(inputDir.X, 0, inputDir.Y)).Normalized();
-		if (direction != Vector3.Zero)
-		{
-			velocity.X = direction.X * Speed;
-			velocity.Z = direction.Z * Speed;
-		}
-		else
-		{
-			velocity.X = Mathf.MoveToward(Velocity.X, 0, Speed);
-			velocity.Z = Mathf.MoveToward(Velocity.Z, 0, Speed);
-		}
+            StateMachine.SetInitialState("Idle", this);
 
-		Velocity = velocity;
-		MoveAndSlide();
-	}
+            StateMachine.StateChanged += OnStateChanged;
+        }
+
+        private void OnStateChanged(string fromState, string toState)
+        {
+            _debugOverlay?.ShowStateTransition(fromState, toState);
+        }
+
+        private void InitializeDebugOverlay()
+        {
+            // Create the canvas layer first
+            _debugCanvasLayer = new CanvasLayer();
+            _debugCanvasLayer.Layer = 100;
+            _debugCanvasLayer.Name = "DebugCanvasLayer";
+
+            // Add canvas layer to root, then chain the next step
+            GetTree().Root.CallDeferred(MethodName.AddChild, _debugCanvasLayer);
+            CallDeferred(nameof(CreateDebugOverlayControl));
+        }
+
+        private void CreateDebugOverlayControl()
+        {
+            // Create the debug overlay control
+            _debugOverlay = new DebugStateOverlay();
+
+            // Add the debug overlay to the canvas layer, then set up the reference
+            _debugCanvasLayer.CallDeferred(MethodName.AddChild, _debugOverlay);
+            CallDeferred(nameof(SetupDebugOverlayReference));
+        }
+
+        private void SetupDebugOverlayReference()
+        {
+            if (_debugOverlay != null)
+            {
+                _debugOverlay.SetPlayer(this);
+                GD.Print("Debug overlay initialized successfully - Press F3 to toggle");
+            }
+            else
+            {
+                GD.PrintErr("Failed to initialize debug overlay");
+            }
+        }
+
+        public override void _Input(InputEvent @event)
+        {
+            if (Input.IsActionJustPressed("ui_cancel"))
+            {
+                Input.MouseMode = Input.MouseModeEnum.Visible;
+            }
+
+            // Handle F3 for debug overlay toggle
+            if (@event is InputEventKey keyEvent && keyEvent.Pressed && keyEvent.Keycode == Key.F3)
+            {
+                GD.Print("Player: F3 key pressed");
+                if (_debugOverlay != null)
+                {
+                    GD.Print("Player: Calling debug overlay toggle");
+                    _debugOverlay.ToggleVisibility();
+                }
+                else
+                {
+                    GD.Print("Player: Debug overlay is null!");
+                }
+            }
+
+            if (@event is InputEventMouseMotion mouseMotion)
+            {
+                RotateY(Mathf.DegToRad(-mouseMotion.Relative.X * MouseSensitivity));
+
+                _pitch -= mouseMotion.Relative.Y * MouseSensitivity;
+                _pitch = Mathf.Clamp(_pitch, -80f, 80f);
+                _cameraPivot.RotationDegrees = new Vector3(_pitch, 0, 0);
+            }
+
+            StateMachine?.HandleInput(this, @event);
+        }
+
+        public override void _Process(double delta)
+        {
+            StateMachine?.Update(this, delta);
+        }
+
+        public override void _PhysicsProcess(double delta)
+        {
+            StateMachine?.PhysicsUpdate(this, delta);
+        }
+
+        public string GetCurrentStateInfo()
+        {
+            return $"Current State: {StateMachine?.CurrentStateName ?? "None"}";
+        }
+
+        public void ForceStateChange(string stateName)
+        {
+            StateMachine?.ChangeState(stateName, this);
+        }
+
+        public override void _ExitTree()
+        {
+            if (StateMachine != null)
+            {
+                StateMachine.StateChanged -= OnStateChanged;
+            }
+
+            if (_debugCanvasLayer != null)
+            {
+                _debugCanvasLayer.QueueFree();
+            }
+        }
+    }
 }
