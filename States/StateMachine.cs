@@ -45,8 +45,6 @@ namespace OpenSlender.States
             _currentState.Enter(player);
 
             EmitSignal(SignalName.StateChanged, previousStateName, stateName);
-
-            GD.Print($"State transition: {previousStateName} -> {stateName}");
         }
 
         public void SetInitialState(string stateName, Player player)

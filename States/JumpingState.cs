@@ -4,9 +4,15 @@ namespace OpenSlender.States
 {
     public class JumpingState : BaseState
     {
+        private float _initialSpeed;
+
         public override void Enter(Player player)
         {
             Vector3 velocity = player.Velocity;
+
+            float currentHorizontalSpeed = new Vector2(velocity.X, velocity.Z).Length();
+            _initialSpeed = currentHorizontalSpeed;
+
             velocity.Y = Player.JumpVelocity;
             player.Velocity = velocity;
         }
@@ -17,6 +23,15 @@ namespace OpenSlender.States
 
             velocity.Y -= (float)ProjectSettings.GetSetting("physics/3d/default_gravity") * (float)delta;
 
+            if (Input.IsActionPressed("crouch"))
+            {
+                player.SetCrouchState(true);
+            }
+            else
+            {
+                player.SetCrouchState(false);
+            }
+
             if (velocity.Y <= 0)
             {
                 player.StateMachine.ChangeState("Falling", player);
@@ -26,11 +41,18 @@ namespace OpenSlender.States
             Vector2 inputDir = Input.GetVector("left", "right", "up", "down");
             Vector3 direction = (player.Transform.Basis * new Vector3(inputDir.X, 0, inputDir.Y)).Normalized();
 
+            float targetSpeed = Input.IsActionPressed("run") ? Player.RunSpeed : Player.Speed;
+            float currentSpeed = new Vector2(velocity.X, velocity.Z).Length();
+
             if (direction != Vector3.Zero)
             {
-                float airControl = Player.Speed * 0.7f;
-                velocity.X = direction.X * airControl;
-                velocity.Z = direction.Z * airControl;
+                float desiredSpeed = Mathf.Max(_initialSpeed, targetSpeed);
+                desiredSpeed = Mathf.MoveToward(desiredSpeed, targetSpeed * 0.7f, (float)delta * 2.0f);
+
+                velocity.X = direction.X * desiredSpeed;
+                velocity.Z = direction.Z * desiredSpeed;
+
+                _initialSpeed = desiredSpeed;
             }
             else
             {

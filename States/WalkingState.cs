@@ -30,6 +30,12 @@ namespace OpenSlender.States
                 return;
             }
 
+            if (Input.IsActionPressed("crouch"))
+            {
+                player.StateMachine.ChangeState("Crouching", player);
+                return;
+            }
+
             if (Input.IsActionPressed("run"))
             {
                 player.StateMachine.ChangeState("Running", player);

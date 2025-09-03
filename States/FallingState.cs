@@ -4,9 +4,12 @@ namespace OpenSlender.States
 {
     public class FallingState : BaseState
     {
+        private float _initialSpeed;
+
         public override void Enter(Player player)
         {
-            // Could trigger falling animation here
+            Vector3 velocity = player.Velocity;
+            _initialSpeed = new Vector2(velocity.X, velocity.Z).Length();
         }
 
         public override void PhysicsUpdate(Player player, double delta)
@@ -15,14 +18,29 @@ namespace OpenSlender.States
 
             velocity.Y -= (float)ProjectSettings.GetSetting("physics/3d/default_gravity") * (float)delta;
 
+            if (Input.IsActionPressed("crouch"))
+            {
+                player.SetCrouchState(true);
+            }
+            else
+            {
+                player.SetCrouchState(false);
+            }
+
             Vector2 inputDir = Input.GetVector("left", "right", "up", "down");
             Vector3 direction = (player.Transform.Basis * new Vector3(inputDir.X, 0, inputDir.Y)).Normalized();
 
+            float targetSpeed = Input.IsActionPressed("run") ? Player.RunSpeed : Player.Speed;
+
             if (direction != Vector3.Zero)
             {
-                float airControl = Player.Speed * 0.6f;
-                velocity.X = direction.X * airControl;
-                velocity.Z = direction.Z * airControl;
+                float desiredSpeed = Mathf.Max(_initialSpeed, targetSpeed);
+                desiredSpeed = Mathf.MoveToward(desiredSpeed, targetSpeed * 0.6f, (float)delta * 2.0f);
+
+                velocity.X = direction.X * desiredSpeed;
+                velocity.Z = direction.Z * desiredSpeed;
+
+                _initialSpeed = desiredSpeed;
             }
             else
             {

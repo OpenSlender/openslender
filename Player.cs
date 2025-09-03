@@ -3,161 +3,220 @@ using OpenSlender.States;
 
 namespace OpenSlender
 {
-    public partial class Player : CharacterBody3D
-    {
-        [Export] public NodePath CameraPivotPath { get; set; }
-        [Export] public NodePath CameraPath { get; set; }
+	public partial class Player : CharacterBody3D
+	{
+		[Export] public NodePath CameraPivotPath { get; set; }
+		[Export] public NodePath CameraPath { get; set; }
 
-        public const float Speed = 5.0f;
-        public const float RunSpeed = 8.0f;
-        public const float JumpVelocity = 4.5f;
-        public const float MouseSensitivity = 0.25f;
+		public const float Speed = 5.0f;
+		public const float RunSpeed = 8.0f;
+		public const float CrouchSpeed = 2.5f;
+		public const float JumpVelocity = 4.5f;
+		public const float MouseSensitivity = 0.25f;
 
-        private Node3D _cameraPivot;
-        private Camera3D _camera;
-        private float _pitch = 0f;
+		private Node3D _cameraPivot;
+		private Camera3D _camera;
+		private float _pitch = 0f;
 
-        public StateMachine StateMachine { get; private set; }
+		private bool _isCrouching = false;
+		private float _normalCameraHeight = 0.0f;
+		private float _crouchCameraHeight = -0.3f;
+		private float _cameraTransitionSpeed = 8.0f;
 
-        private DebugStateOverlay _debugOverlay;
-        private CanvasLayer _debugCanvasLayer;
+		private CollisionShape3D _collisionShape;
+		private CapsuleShape3D _capsuleShape;
+		private float _normalCapsuleHeight = 2.0f;
+		private float _crouchCapsuleHeight = 2.0f;
 
-        public override void _Ready()
-        {
-            AddToGroup("player");
+		private MeshInstance3D _meshInstance;
+		private CapsuleMesh _capsuleMesh;
 
-            _cameraPivot = GetNode<Node3D>(CameraPivotPath);
-            _camera = GetNode<Camera3D>(CameraPath);
-            Input.MouseMode = Input.MouseModeEnum.Captured;
+		public StateMachine StateMachine { get; private set; }
 
-            InitializeStateMachine();
+		private DebugStateOverlay _debugOverlay;
+		private CanvasLayer _debugCanvasLayer;
 
-            // Defer debug overlay creation to avoid scene tree conflicts
-            CallDeferred(nameof(InitializeDebugOverlay));
-        }
+		public override void _Ready()
+		{
+			AddToGroup("player");
 
-        private void InitializeStateMachine()
-        {
-            StateMachine = new StateMachine();
-            AddChild(StateMachine);
+			_cameraPivot = GetNode<Node3D>(CameraPivotPath);
+			_camera = GetNode<Camera3D>(CameraPath);
+			_collisionShape = GetNode<CollisionShape3D>("CollisionShape3D");
+			_capsuleShape = (CapsuleShape3D)_collisionShape.Shape;
+			_normalCapsuleHeight = _capsuleShape.Height;
+			_crouchCapsuleHeight = _normalCapsuleHeight * 0.7f;
 
-            StateMachine.AddState("Idle", new IdleState());
-            StateMachine.AddState("Walking", new WalkingState());
-            StateMachine.AddState("Running", new RunningState());
-            StateMachine.AddState("Jumping", new JumpingState());
-            StateMachine.AddState("Falling", new FallingState());
-            StateMachine.AddState("Landing", new LandingState());
+			_meshInstance = GetNode<MeshInstance3D>("MeshInstance3D");
+			_capsuleMesh = (CapsuleMesh)_meshInstance.Mesh;
 
-            StateMachine.SetInitialState("Idle", this);
+			Input.MouseMode = Input.MouseModeEnum.Captured;
 
-            StateMachine.StateChanged += OnStateChanged;
-        }
+			InitializeStateMachine();
 
-        private void OnStateChanged(string fromState, string toState)
-        {
-            _debugOverlay?.ShowStateTransition(fromState, toState);
-        }
+			CallDeferred(nameof(InitializeDebugOverlay));
+		}
 
-        private void InitializeDebugOverlay()
-        {
-            // Create the canvas layer first
-            _debugCanvasLayer = new CanvasLayer();
-            _debugCanvasLayer.Layer = 100;
-            _debugCanvasLayer.Name = "DebugCanvasLayer";
+		private void InitializeStateMachine()
+		{
+			StateMachine = new StateMachine();
+			AddChild(StateMachine);
 
-            // Add canvas layer to root, then chain the next step
-            GetTree().Root.CallDeferred(MethodName.AddChild, _debugCanvasLayer);
-            CallDeferred(nameof(CreateDebugOverlayControl));
-        }
+			StateMachine.AddState("Idle", new IdleState());
+			StateMachine.AddState("Walking", new WalkingState());
+			StateMachine.AddState("Running", new RunningState());
+			StateMachine.AddState("Crouching", new CrouchingState());
+			StateMachine.AddState("Jumping", new JumpingState());
+			StateMachine.AddState("Falling", new FallingState());
+			StateMachine.AddState("Landing", new LandingState());
 
-        private void CreateDebugOverlayControl()
-        {
-            // Create the debug overlay control
-            _debugOverlay = new DebugStateOverlay();
+			StateMachine.SetInitialState("Idle", this);
 
-            // Add the debug overlay to the canvas layer, then set up the reference
-            _debugCanvasLayer.CallDeferred(MethodName.AddChild, _debugOverlay);
-            CallDeferred(nameof(SetupDebugOverlayReference));
-        }
+			StateMachine.StateChanged += OnStateChanged;
+		}
 
-        private void SetupDebugOverlayReference()
-        {
-            if (_debugOverlay != null)
-            {
-                _debugOverlay.SetPlayer(this);
-                GD.Print("Debug overlay initialized successfully - Press F3 to toggle");
-            }
-            else
-            {
-                GD.PrintErr("Failed to initialize debug overlay");
-            }
-        }
+		private void OnStateChanged(string fromState, string toState)
+		{
+			_debugOverlay?.ShowStateTransition(fromState, toState);
+		}
 
-        public override void _Input(InputEvent @event)
-        {
-            if (Input.IsActionJustPressed("ui_cancel"))
-            {
-                Input.MouseMode = Input.MouseModeEnum.Visible;
-            }
+		private void InitializeDebugOverlay()
+		{
+			_debugCanvasLayer = new CanvasLayer();
+			_debugCanvasLayer.Layer = 100;
+			_debugCanvasLayer.Name = "DebugCanvasLayer";
 
-            // Handle F3 for debug overlay toggle
-            if (@event is InputEventKey keyEvent && keyEvent.Pressed && keyEvent.Keycode == Key.F3)
-            {
-                GD.Print("Player: F3 key pressed");
-                if (_debugOverlay != null)
-                {
-                    GD.Print("Player: Calling debug overlay toggle");
-                    _debugOverlay.ToggleVisibility();
-                }
-                else
-                {
-                    GD.Print("Player: Debug overlay is null!");
-                }
-            }
+			GetTree().Root.CallDeferred(MethodName.AddChild, _debugCanvasLayer);
+			CallDeferred(nameof(CreateDebugOverlayControl));
+		}
 
-            if (@event is InputEventMouseMotion mouseMotion)
-            {
-                RotateY(Mathf.DegToRad(-mouseMotion.Relative.X * MouseSensitivity));
+		private void CreateDebugOverlayControl()
+		{
+			_debugOverlay = new DebugStateOverlay();
 
-                _pitch -= mouseMotion.Relative.Y * MouseSensitivity;
-                _pitch = Mathf.Clamp(_pitch, -80f, 80f);
-                _cameraPivot.RotationDegrees = new Vector3(_pitch, 0, 0);
-            }
+			_debugCanvasLayer.CallDeferred(MethodName.AddChild, _debugOverlay);
+			CallDeferred(nameof(SetupDebugOverlayReference));
+		}
 
-            StateMachine?.HandleInput(this, @event);
-        }
+		private void SetupDebugOverlayReference()
+		{
+			if (_debugOverlay != null)
+			{
+				_debugOverlay.SetPlayer(this);
+				GD.Print("Debug overlay initialized successfully - Press F3 to toggle");
+			}
+			else
+			{
+				GD.PrintErr("Failed to initialize debug overlay");
+			}
+		}
 
-        public override void _Process(double delta)
-        {
-            StateMachine?.Update(this, delta);
-        }
+		public override void _Input(InputEvent @event)
+		{
+			if (Input.IsActionJustPressed("ui_cancel"))
+			{
+				Input.MouseMode = Input.MouseModeEnum.Visible;
+			}
 
-        public override void _PhysicsProcess(double delta)
-        {
-            StateMachine?.PhysicsUpdate(this, delta);
-        }
+			if (@event is InputEventKey keyEvent && keyEvent.Pressed && keyEvent.Keycode == Key.F3)
+			{
+				GD.Print("Player: F3 key pressed");
+				if (_debugOverlay != null)
+				{
+					GD.Print("Player: Calling debug overlay toggle");
+					_debugOverlay.ToggleVisibility();
+				}
+				else
+				{
+					GD.Print("Player: Debug overlay is null!");
+				}
+			}
 
-        public string GetCurrentStateInfo()
-        {
-            return $"Current State: {StateMachine?.CurrentStateName ?? "None"}";
-        }
+			if (@event is InputEventMouseMotion mouseMotion)
+			{
+				RotateY(Mathf.DegToRad(-mouseMotion.Relative.X * MouseSensitivity));
 
-        public void ForceStateChange(string stateName)
-        {
-            StateMachine?.ChangeState(stateName, this);
-        }
+				_pitch -= mouseMotion.Relative.Y * MouseSensitivity;
+				_pitch = Mathf.Clamp(_pitch, -80f, 80f);
+				_cameraPivot.RotationDegrees = new Vector3(_pitch, 0, 0);
+			}
 
-        public override void _ExitTree()
-        {
-            if (StateMachine != null)
-            {
-                StateMachine.StateChanged -= OnStateChanged;
-            }
+			StateMachine?.HandleInput(this, @event);
+		}
 
-            if (_debugCanvasLayer != null)
-            {
-                _debugCanvasLayer.QueueFree();
-            }
-        }
-    }
+		public override void _PhysicsProcess(double delta)
+		{
+			StateMachine?.PhysicsUpdate(this, delta);
+		}
+
+		public string GetCurrentStateInfo()
+		{
+			return $"Current State: {StateMachine?.CurrentStateName ?? "None"}";
+		}
+
+		public void ForceStateChange(string stateName)
+		{
+			StateMachine?.ChangeState(stateName, this);
+		}
+
+		public void SetCrouchState(bool crouching)
+		{
+			_isCrouching = crouching;
+			UpdateCollisionShape();
+		}
+
+		private void UpdateCollisionShape()
+		{
+			if (_capsuleShape != null)
+			{
+				float oldHeight = _capsuleShape.Height;
+				float targetHeight = _isCrouching ? _crouchCapsuleHeight : _normalCapsuleHeight;
+
+				float heightDifference = oldHeight - targetHeight;
+
+				if (IsOnFloor() && heightDifference != 0)
+				{
+					Vector3 currentPos = GlobalPosition;
+					currentPos.Y -= heightDifference * 0.5f;
+					GlobalPosition = currentPos;
+				}
+
+				_capsuleShape.Height = targetHeight;
+			}
+
+			if (_capsuleMesh != null)
+			{
+				float targetHeight = _isCrouching ? _crouchCapsuleHeight : _normalCapsuleHeight;
+				_capsuleMesh.Height = targetHeight;
+			}
+		}
+
+		public override void _Process(double delta)
+		{
+			StateMachine?.Update(this, delta);
+			UpdateCameraHeight(delta);
+		}
+
+		private void UpdateCameraHeight(double delta)
+		{
+			float targetHeight = _isCrouching ? _crouchCameraHeight : _normalCameraHeight;
+			float currentY = _cameraPivot.Position.Y;
+			float newY = Mathf.MoveToward(currentY, targetHeight, _cameraTransitionSpeed * (float)delta);
+
+			_cameraPivot.Position = new Vector3(_cameraPivot.Position.X, newY, _cameraPivot.Position.Z);
+		}
+
+		public override void _ExitTree()
+		{
+			if (StateMachine != null)
+			{
+				StateMachine.StateChanged -= OnStateChanged;
+			}
+
+			if (_debugCanvasLayer != null)
+			{
+				_debugCanvasLayer.QueueFree();
+			}
+		}
+	}
 }

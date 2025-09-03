@@ -45,6 +45,12 @@ namespace OpenSlender.States
 
             if (_landingTimer >= LandingDuration)
             {
+                if (Input.IsActionPressed("crouch"))
+                {
+                    player.StateMachine.ChangeState("Crouching", player);
+                    return;
+                }
+                
                 if (inputDir.LengthSquared() > 0.1f)
                 {
                     player.StateMachine.ChangeState("Walking", player);
