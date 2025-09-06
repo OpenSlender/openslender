@@ -2,7 +2,7 @@ using Godot;
 
 namespace OpenSlender.States
 {
-	public class CrouchingState : BaseState
+	public class CrouchingState : BaseLocomotionState
 	{
 		public override void Enter(Player player)
 		{
@@ -13,49 +13,42 @@ namespace OpenSlender.States
 		{
 			Vector3 velocity = player.Velocity;
 
-			if (!player.IsOnFloor())
+			if (HandleAirborne(player, ref velocity, delta))
 			{
-				velocity.Y -= (float)ProjectSettings.GetSetting("physics/3d/default_gravity") * (float)delta;
-				player.StateMachine.ChangeState("Falling", player);
+				player.Velocity = velocity;
+				player.MoveAndSlide();
 				return;
 			}
 
-			if (Input.IsActionJustPressed("ui_accept"))
+			if (TryStartJump(player))
 			{
-				player.StateMachine.ChangeState("Jumping", player);
 				return;
 			}
 
-			Vector2 inputDir = Input.GetVector("left", "right", "up", "down");
+			Vector2 inputDir = ReadInput2D();
 
 			if (!Input.IsActionPressed("crouch"))
 			{
-				if (inputDir.LengthSquared() > 0.1f)
+				if (inputDir.LengthSquared() > InputThresholdSquared)
 				{
-					player.StateMachine.ChangeState("Walking", player);
+					player.StateMachine.ChangeState(StateNames.Walking, player);
 					return;
 				}
 				else
 				{
-					player.StateMachine.ChangeState("Idle", player);
+					player.StateMachine.ChangeState(StateNames.Idle, player);
 					return;
 				}
 			}
 
-			if (inputDir.LengthSquared() < 0.1f)
+			if (inputDir.LengthSquared() < InputThresholdSquared)
 			{
-				velocity.X = Mathf.MoveToward(velocity.X, 0, Player.Speed * (float)delta * 3f);
-				velocity.Z = Mathf.MoveToward(velocity.Z, 0, Player.Speed * (float)delta * 3f);
+				ApplyHorizontal(Vector3.Zero, Player.Speed, delta, ref velocity, 3f);
 			}
 			else
 			{
-				Vector3 direction = (player.Transform.Basis * new Vector3(inputDir.X, 0, inputDir.Y)).Normalized();
-
-				if (direction != Vector3.Zero)
-				{
-					velocity.X = direction.X * Player.CrouchSpeed;
-					velocity.Z = direction.Z * Player.CrouchSpeed;
-				}
+				Vector3 direction = ComputeWorldDirection(player, inputDir);
+				ApplyHorizontal(direction, Player.CrouchSpeed, delta, ref velocity);
 			}
 
 			player.Velocity = velocity;
@@ -67,9 +60,6 @@ namespace OpenSlender.States
 			player.SetCrouchState(false);
 		}
 
-		public override string GetStateName()
-		{
-			return "Crouching";
-		}
+		
 	}
 }

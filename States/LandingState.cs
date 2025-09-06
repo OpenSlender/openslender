@@ -29,9 +29,9 @@ namespace OpenSlender.States
 
             if (!player.IsOnFloor())
             {
-                velocity.Y -= (float)ProjectSettings.GetSetting("physics/3d/default_gravity") * (float)delta;
+                velocity.Y -= StateUtils.Gravity * (float)delta;
 
-                player.StateMachine.ChangeState("Falling", player);
+                player.StateMachine.ChangeState(StateNames.Falling, player);
                 return;
             }
 
@@ -39,7 +39,7 @@ namespace OpenSlender.States
 
             if (Input.IsActionJustPressed("ui_accept"))
             {
-                player.StateMachine.ChangeState("Jumping", player);
+                player.StateMachine.ChangeState(StateNames.Jumping, player);
                 return;
             }
 
@@ -47,18 +47,18 @@ namespace OpenSlender.States
             {
                 if (Input.IsActionPressed("crouch"))
                 {
-                    player.StateMachine.ChangeState("Crouching", player);
+                    player.StateMachine.ChangeState(StateNames.Crouching, player);
                     return;
                 }
                 
                 if (inputDir.LengthSquared() > 0.1f)
                 {
-                    player.StateMachine.ChangeState("Walking", player);
+                    player.StateMachine.ChangeState(StateNames.Walking, player);
                     return;
                 }
                 else
                 {
-                    player.StateMachine.ChangeState("Idle", player);
+                    player.StateMachine.ChangeState(StateNames.Idle, player);
                     return;
                 }
             }
@@ -75,9 +75,6 @@ namespace OpenSlender.States
             _landingTimer = 0.0;
         }
 
-        public override string GetStateName()
-        {
-            return "Landing";
-        }
+        
     }
 }

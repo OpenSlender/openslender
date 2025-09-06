@@ -62,15 +62,15 @@ namespace OpenSlender
 			StateMachine = new StateMachine();
 			AddChild(StateMachine);
 
-			StateMachine.AddState("Idle", new IdleState());
-			StateMachine.AddState("Walking", new WalkingState());
-			StateMachine.AddState("Running", new RunningState());
-			StateMachine.AddState("Crouching", new CrouchingState());
-			StateMachine.AddState("Jumping", new JumpingState());
-			StateMachine.AddState("Falling", new FallingState());
-			StateMachine.AddState("Landing", new LandingState());
+			StateMachine.AddState(new IdleState());
+			StateMachine.AddState(new WalkingState());
+			StateMachine.AddState(new RunningState());
+			StateMachine.AddState(new CrouchingState());
+			StateMachine.AddState(new JumpingState());
+			StateMachine.AddState(new FallingState());
+			StateMachine.AddState(new LandingState());
 
-			StateMachine.SetInitialState("Idle", this);
+			StateMachine.SetInitialState(StateNames.Idle, this);
 
 			StateMachine.StateChanged += OnStateChanged;
 		}

@@ -21,7 +21,7 @@ namespace OpenSlender.States
         {
             Vector3 velocity = player.Velocity;
 
-            velocity.Y -= (float)ProjectSettings.GetSetting("physics/3d/default_gravity") * (float)delta;
+            velocity.Y -= StateUtils.Gravity * (float)delta;
 
             if (Input.IsActionPressed("crouch"))
             {
@@ -34,7 +34,7 @@ namespace OpenSlender.States
 
             if (velocity.Y <= 0)
             {
-                player.StateMachine.ChangeState("Falling", player);
+                player.StateMachine.ChangeState(StateNames.Falling, player);
                 return;
             }
 
@@ -65,14 +65,11 @@ namespace OpenSlender.States
 
             if (player.IsOnFloor() && velocity.Y <= 0)
             {
-                player.StateMachine.ChangeState("Landing", player);
+                player.StateMachine.ChangeState(StateNames.Landing, player);
                 return;
             }
         }
 
-        public override string GetStateName()
-        {
-            return "Jumping";
-        }
+        
     }
 }

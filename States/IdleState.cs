@@ -3,7 +3,7 @@ using Godot;
 namespace OpenSlender.States
 {
 
-    public class IdleState : BaseState
+    public class IdleState : BaseLocomotionState
     {
         public override void Enter(Player player)
         {
@@ -14,25 +14,22 @@ namespace OpenSlender.States
         {
             Vector3 velocity = player.Velocity;
 
-            if (!player.IsOnFloor())
+            if (HandleAirborne(player, ref velocity, delta))
             {
-                velocity.Y -= (float)ProjectSettings.GetSetting("physics/3d/default_gravity") * (float)delta;
-
-                player.StateMachine.ChangeState("Falling", player);
+                player.Velocity = velocity;
+                player.MoveAndSlide();
                 return;
             }
 
-            Vector2 inputDir = Input.GetVector("left", "right", "up", "down");
+            Vector2 inputDir = ReadInput2D();
 
-            if (Input.IsActionJustPressed("ui_accept"))
+            if (TryStartJump(player))
             {
-                player.StateMachine.ChangeState("Jumping", player);
                 return;
             }
 
-            if (Input.IsActionPressed("crouch"))
+            if (TryStartCrouch(player))
             {
-                player.StateMachine.ChangeState("Crouching", player);
                 return;
             }
 
@@ -40,24 +37,19 @@ namespace OpenSlender.States
             {
                 if (Input.IsActionPressed("run"))
                 {
-                    player.StateMachine.ChangeState("Running", player);
+                    player.StateMachine.ChangeState(StateNames.Running, player);
                     return;
                 }
 
-                player.StateMachine.ChangeState("Walking", player);
+                player.StateMachine.ChangeState(StateNames.Walking, player);
                 return;
             }
 
-            velocity.X = Mathf.MoveToward(velocity.X, 0, Player.Speed * (float)delta * 3f);
-            velocity.Z = Mathf.MoveToward(velocity.Z, 0, Player.Speed * (float)delta * 3f);
+            ApplyHorizontal(Vector3.Zero, Player.Speed, delta, ref velocity, 3f);
 
             player.Velocity = velocity;
             player.MoveAndSlide();
         }
 
-        public override string GetStateName()
-        {
-            return "Idle";
-        }
     }
 }
