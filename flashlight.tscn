@@ -1,0 +1,62 @@
+[gd_scene load_steps=8 format=3 uid="uid://ur5bi5k6wfdv"]
+
+[ext_resource type="Texture2D" uid="uid://c7sqoalrmknya" path="res://dry_decay_leaves_diff_4k.jpg" id="1_nnxok"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_0kh7f"]
+
+[sub_resource type="Sky" id="Sky_nnxok"]
+sky_material = SubResource("ProceduralSkyMaterial_0kh7f")
+process_mode = 1
+
+[sub_resource type="Environment" id="Environment_h3kvc"]
+background_mode = 2
+background_energy_multiplier = 0.51
+sky = SubResource("Sky_nnxok")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_nnxok"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_h3kvc"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nnxok"]
+albedo_texture = ExtResource("1_nnxok")
+
+[node name="Node3D" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_h3kvc")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+transform = Transform3D(3.24375, 0, -0.201465, 0, 3.25, 0, 0.201465, 0, 3.24375, 0, 0, 2.45411)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("BoxShape3D_nnxok")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D/CollisionShape3D"]
+transform = Transform3D(0.051029, 0, -0.998697, 0, 1, 0, 0.998697, 0, 0.051029, -0.0106037, 0, -0.170729)
+mesh = SubResource("BoxMesh_h3kvc")
+surface_material_override/0 = SubResource("StandardMaterial3D_nnxok")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="StaticBody3D"]
+transform = Transform3D(3.24375, 0, -0.201465, 0, 3.25, 0, 0.201465, 0, 3.24375, 0.0243018, 0, 2.84539)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D/StaticBody3D"]
+shape = SubResource("BoxShape3D_nnxok")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D/StaticBody3D/CollisionShape3D"]
+transform = Transform3D(0.051029, 0, -0.998697, 0, 1, 0, 0.998697, 0, 0.051029, 0, 0, 0)
+mesh = SubResource("BoxMesh_h3kvc")
+
+[node name="Camera3D2" type="Camera3D" parent="."]
+transform = Transform3D(-0.85633, 0, 0.516429, 0, 1, 0, -0.516429, 0, -0.85633, 4.6945, 0.525826, -7.43295)
+fov = 71.6
+
+[node name="SpotLight3D" type="SpotLight3D" parent="."]
+transform = Transform3D(-0.987253, 0, 0.159157, 0, 1, 0, -0.159157, 0, -0.987253, 0.847408, 0.0680513, -7.71431)
+light_energy = 4.394
+light_indirect_energy = 7.626
+shadow_enabled = true
+distance_fade_enabled = true
+spot_range = 37.557
+spot_attenuation = -0.02
+spot_angle = 27.25
+spot_angle_attenuation = 9.84914
