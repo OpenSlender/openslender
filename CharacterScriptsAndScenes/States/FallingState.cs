@@ -34,18 +34,23 @@ namespace OpenSlender.States
 
             if (direction != Vector3.Zero)
             {
-                float desiredSpeed = Mathf.Max(_initialSpeed, targetSpeed);
-                desiredSpeed = Mathf.MoveToward(desiredSpeed, targetSpeed * player.Settings.FallDesiredSpeedFactor, (float)delta * player.Settings.AirSpeedLerpRate);
+                float desiredMaxSpeed = targetSpeed * player.Settings.FallDesiredSpeedFactor;
 
-                velocity.X = direction.X * desiredSpeed;
-                velocity.Z = direction.Z * desiredSpeed;
+                Vector3 dir = new Vector3(direction.X, 0, direction.Z);
+                Vector3 currentHorizontal = new Vector3(velocity.X, 0, velocity.Z);
 
-                _initialSpeed = desiredSpeed;
-            }
-            else
-            {
-                velocity.X = Mathf.MoveToward(velocity.X, 0, player.Settings.WalkSpeed * player.Settings.FallNoInputDampingFactor * (float)delta);
-                velocity.Z = Mathf.MoveToward(velocity.Z, 0, player.Settings.WalkSpeed * player.Settings.FallNoInputDampingFactor * (float)delta);
+                float speedAlong = currentHorizontal.Dot(dir);
+                float needed = desiredMaxSpeed - speedAlong;
+
+                if (needed > 0.0f)
+                {
+                    float maxDelta = player.Settings.AirControlAcceleration * (float)delta;
+                    float accel = Mathf.Min(needed, maxDelta);
+                    currentHorizontal += dir * accel;
+                }
+
+                velocity.X = currentHorizontal.X;
+                velocity.Z = currentHorizontal.Z;
             }
 
             player.Velocity = velocity;
@@ -58,6 +63,6 @@ namespace OpenSlender.States
             }
         }
 
-        
+
     }
 }

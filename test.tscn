@@ -1,6 +1,7 @@
-[gd_scene load_steps=10 format=3 uid="uid://dy84ytbqiv8pd"]
+[gd_scene load_steps=9 format=3 uid="uid://dy84ytbqiv8pd"]
 
-[ext_resource type="Script" uid="uid://c8s1aundn0c5q" path="res://Player.cs" id="1_37kl0"]
+[ext_resource type="PackedScene" uid="uid://4s5l0lcm7727" path="res://CharacterScriptsAndScenes/player.tscn" id="1_37kl0"]
+[ext_resource type="PackedScene" uid="uid://cxvghomnuy4fh" path="res://collectible.tscn" id="2_8uh7m"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_37kl0"]
 albedo_color = Color(0.572988, 0.572988, 0.572988, 1)
@@ -10,10 +11,6 @@ material = SubResource("StandardMaterial3D_37kl0")
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_37kl0"]
 size = Vector3(20, 1, 20)
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_mf4mk"]
-
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_37kl0"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_37kl0"]
 
@@ -38,25 +35,8 @@ mesh = SubResource("BoxMesh_mf4mk")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/StaticBody3D"]
 shape = SubResource("BoxShape3D_37kl0")
 
-[node name="Player" type="CharacterBody3D" parent="."]
+[node name="Player" parent="." instance=ExtResource("1_37kl0")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.67051, 0)
-script = ExtResource("1_37kl0")
-CameraPivotPath = NodePath("CameraPivot")
-CameraPath = NodePath("CameraPivot/Camera3D")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Player"]
-cast_shadow = 3
-mesh = SubResource("CapsuleMesh_mf4mk")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
-shape = SubResource("CapsuleShape3D_37kl0")
-
-[node name="CameraPivot" type="Node3D" parent="Player"]
-
-[node name="Camera3D" type="Camera3D" parent="Player/CameraPivot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.51074, 0)
-fov = 105.5
-near = 0.2
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_6uqi0")
@@ -64,3 +44,11 @@ environment = SubResource("Environment_6uqi0")
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.996291, -0.0341432, 0.0789857, -0.0789858, -0.727076, 0.681998, 0.034143, -0.685707, -0.727076, 0, 0, 0)
 shadow_enabled = true
+
+[node name="Collectible" parent="." instance=ExtResource("2_8uh7m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.255679, 1.94912, -6.0519)
+OneShot = null
+
+[node name="Collectible2" parent="." instance=ExtResource("2_8uh7m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.20999, 1.87489, -6.3024)
+OneShot = null
