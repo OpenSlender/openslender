@@ -4,8 +4,6 @@ namespace OpenSlender.States
 {
     public abstract class BaseLocomotionState : BaseState
     {
-        protected const float InputThresholdSquared = 0.1f;
-
         protected bool HandleAirborne(Player player, ref Vector3 velocity, double delta)
         {
             if (!player.IsOnFloor())

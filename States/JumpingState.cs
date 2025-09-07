@@ -13,7 +13,7 @@ namespace OpenSlender.States
             float currentHorizontalSpeed = new Vector2(velocity.X, velocity.Z).Length();
             _initialSpeed = currentHorizontalSpeed;
 
-            velocity.Y = Player.JumpVelocity;
+            velocity.Y = player.Settings.JumpVelocity;
             player.Velocity = velocity;
         }
 
@@ -41,13 +41,13 @@ namespace OpenSlender.States
             Vector2 inputDir = Input.GetVector("left", "right", "up", "down");
             Vector3 direction = (player.Transform.Basis * new Vector3(inputDir.X, 0, inputDir.Y)).Normalized();
 
-            float targetSpeed = Input.IsActionPressed("run") ? Player.RunSpeed : Player.Speed;
+            float targetSpeed = Input.IsActionPressed("run") ? player.Settings.RunSpeed : player.Settings.WalkSpeed;
             float currentSpeed = new Vector2(velocity.X, velocity.Z).Length();
 
             if (direction != Vector3.Zero)
             {
                 float desiredSpeed = Mathf.Max(_initialSpeed, targetSpeed);
-                desiredSpeed = Mathf.MoveToward(desiredSpeed, targetSpeed * 0.7f, (float)delta * 2.0f);
+                desiredSpeed = Mathf.MoveToward(desiredSpeed, targetSpeed * player.Settings.JumpDesiredSpeedFactor, (float)delta * player.Settings.AirSpeedLerpRate);
 
                 velocity.X = direction.X * desiredSpeed;
                 velocity.Z = direction.Z * desiredSpeed;
@@ -56,8 +56,8 @@ namespace OpenSlender.States
             }
             else
             {
-                velocity.X = Mathf.MoveToward(velocity.X, 0, Player.Speed * 0.5f * (float)delta);
-                velocity.Z = Mathf.MoveToward(velocity.Z, 0, Player.Speed * 0.5f * (float)delta);
+                velocity.X = Mathf.MoveToward(velocity.X, 0, player.Settings.WalkSpeed * player.Settings.JumpNoInputDampingFactor * (float)delta);
+                velocity.Z = Mathf.MoveToward(velocity.Z, 0, player.Settings.WalkSpeed * player.Settings.JumpNoInputDampingFactor * (float)delta);
             }
 
             player.Velocity = velocity;

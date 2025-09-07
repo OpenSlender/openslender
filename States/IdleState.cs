@@ -33,7 +33,7 @@ namespace OpenSlender.States
                 return;
             }
 
-            if (inputDir.LengthSquared() > 0.1f)
+            if (inputDir.LengthSquared() > player.Settings.InputThresholdSquared)
             {
                 if (Input.IsActionPressed("run"))
                 {
@@ -45,7 +45,7 @@ namespace OpenSlender.States
                 return;
             }
 
-            ApplyHorizontal(Vector3.Zero, Player.Speed, delta, ref velocity, 3f);
+            ApplyHorizontal(Vector3.Zero, player.Settings.WalkSpeed, delta, ref velocity, player.Settings.IdleStopDampingMultiplier);
 
             player.Velocity = velocity;
             player.MoveAndSlide();

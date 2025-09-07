@@ -5,14 +5,9 @@ namespace OpenSlender
 {
 	public partial class Player : CharacterBody3D
 	{
+		[Export] public PlayerSettings Settings { get; set; } = new PlayerSettings();
 		[Export] public NodePath CameraPivotPath { get; set; }
 		[Export] public NodePath CameraPath { get; set; }
-
-		public const float Speed = 5.0f;
-		public const float RunSpeed = 8.0f;
-		public const float CrouchSpeed = 2.5f;
-		public const float JumpVelocity = 4.5f;
-		public const float MouseSensitivity = 0.25f;
 
 		private Node3D _cameraPivot;
 		private Camera3D _camera;
@@ -45,10 +40,13 @@ namespace OpenSlender
 			_collisionShape = GetNode<CollisionShape3D>("CollisionShape3D");
 			_capsuleShape = (CapsuleShape3D)_collisionShape.Shape;
 			_normalCapsuleHeight = _capsuleShape.Height;
-			_crouchCapsuleHeight = _normalCapsuleHeight * 0.7f;
+			_crouchCapsuleHeight = _normalCapsuleHeight * Settings.CrouchHeightRatio;
 
 			_meshInstance = GetNode<MeshInstance3D>("MeshInstance3D");
 			_capsuleMesh = (CapsuleMesh)_meshInstance.Mesh;
+
+			_crouchCameraHeight = Settings.CrouchCameraHeight;
+			_cameraTransitionSpeed = Settings.CameraTransitionSpeed;
 
 			Input.MouseMode = Input.MouseModeEnum.Captured;
 
@@ -134,10 +132,10 @@ namespace OpenSlender
 
 			if (@event is InputEventMouseMotion mouseMotion)
 			{
-				RotateY(Mathf.DegToRad(-mouseMotion.Relative.X * MouseSensitivity));
+				RotateY(Mathf.DegToRad(-mouseMotion.Relative.X * Settings.MouseSensitivity));
 
-				_pitch -= mouseMotion.Relative.Y * MouseSensitivity;
-				_pitch = Mathf.Clamp(_pitch, -80f, 80f);
+				_pitch -= mouseMotion.Relative.Y * Settings.MouseSensitivity;
+				_pitch = Mathf.Clamp(_pitch, -Settings.MaxPitchDegrees, Settings.MaxPitchDegrees);
 				_cameraPivot.RotationDegrees = new Vector3(_pitch, 0, 0);
 			}
 
