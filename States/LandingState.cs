@@ -1,12 +1,10 @@
 using Godot;
-using OpenSlender;
 
 namespace OpenSlender.States
 {
     public class LandingState : BaseState
     {
         private double _landingTimer = 0.0;
-        private const double LandingDuration = 0.1;
 
         public override void Enter(Player player)
         {
@@ -43,7 +41,7 @@ namespace OpenSlender.States
                 return;
             }
 
-            if (_landingTimer >= LandingDuration)
+            if (_landingTimer >= player.Settings.LandingDuration)
             {
                 if (Input.IsActionPressed("crouch"))
                 {
@@ -51,7 +49,7 @@ namespace OpenSlender.States
                     return;
                 }
                 
-                if (inputDir.LengthSquared() > 0.1f)
+                if (inputDir.LengthSquared() > player.Settings.InputThresholdSquared)
                 {
                     player.StateMachine.ChangeState(StateNames.Walking, player);
                     return;
@@ -63,8 +61,8 @@ namespace OpenSlender.States
                 }
             }
 
-            velocity.X = Mathf.MoveToward(velocity.X, 0, Player.Speed * (float)delta * 2f);
-            velocity.Z = Mathf.MoveToward(velocity.Z, 0, Player.Speed * (float)delta * 2f);
+            velocity.X = Mathf.MoveToward(velocity.X, 0, player.Settings.WalkSpeed * (float)delta * player.Settings.LandingStopDampingMultiplier);
+            velocity.Z = Mathf.MoveToward(velocity.Z, 0, player.Settings.WalkSpeed * (float)delta * player.Settings.LandingStopDampingMultiplier);
 
             player.Velocity = velocity;
             player.MoveAndSlide();

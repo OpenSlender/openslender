@@ -32,14 +32,14 @@ namespace OpenSlender.States
                 return;
             }
 
-            if (inputDir.LengthSquared() < InputThresholdSquared)
+            if (inputDir.LengthSquared() < player.Settings.InputThresholdSquared)
             {
                 player.StateMachine.ChangeState(StateNames.Idle, player);
                 return;
             }
 
             Vector3 direction = ComputeWorldDirection(player, inputDir);
-            ApplyHorizontal(direction, Player.Speed, delta, ref velocity);
+            ApplyHorizontal(direction, player.Settings.WalkSpeed, delta, ref velocity);
 
             player.Velocity = velocity;
             player.MoveAndSlide();

@@ -25,7 +25,7 @@ namespace OpenSlender.States
             if (TryStartJump(player)) { return; }
             if (TryStartCrouch(player)) { return; }
 
-            if (inputDir.LengthSquared() < InputThresholdSquared)
+            if (inputDir.LengthSquared() < player.Settings.InputThresholdSquared)
             {
                 player.StateMachine.ChangeState(StateNames.Idle, player);
                 return;
@@ -38,7 +38,7 @@ namespace OpenSlender.States
             }
 
             Vector3 direction = ComputeWorldDirection(player, inputDir);
-            ApplyHorizontal(direction, Player.RunSpeed, delta, ref velocity);
+            ApplyHorizontal(direction, player.Settings.RunSpeed, delta, ref velocity);
 
             player.Velocity = velocity;
             player.MoveAndSlide();
