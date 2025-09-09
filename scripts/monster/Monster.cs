@@ -1,34 +1,65 @@
 using Godot;
-using System;
+using OpenSlender.MonsterStates;
 
-public partial class Monster : CharacterBody3D
+namespace OpenSlender
 {
-    [Export] public NodePath TargetPath { get; set; }
-    [Export] public float Speed { get; set; } = 3.0f;
-    [Export] public float DetectionRange { get; set; } = 10.0f;
+	public partial class Monster : CharacterBody3D
+	{
+		[Export] public float Speed { get; set; } = 3.0f;
+		[Export] public float DetectionRange { get; set; } = 10.0f;
 
-    private Node3D _target;
-    private NavigationAgent3D _navigationAgent;
+		public NavigationAgent3D NavigationAgent { get; private set; }
+		public RayCast3D Raycast { get; private set; }
+		public Vector3 LastKnownPosition { get; set; } = Vector3.Zero;
+		public MonsterStateMachine StateMachine { get; private set; }
 
-    public override void _Ready()
-    {
-        _target = GetNode<Node3D>(TargetPath);
-        _navigationAgent = GetNode<NavigationAgent3D>("NavigationAgent3D");
-        _navigationAgent.TargetPosition = _target.GlobalPosition;
-    }
+		public override void _Ready()
+		{
+			NavigationAgent = GetNode<NavigationAgent3D>("NavigationAgent3D");
+			Raycast = GetNode<RayCast3D>("RayCast3D");
+			InitializeStateMachine();
+		}
 
-    public override void _Process(double delta)
-    {
-        if (_target == null || _navigationAgent == null) return;
+		private void InitializeStateMachine()
+		{
+			StateMachine = new MonsterStateMachine();
+			AddChild(StateMachine);
 
-        float distanceToTarget = GlobalPosition.DistanceTo(_target.GlobalPosition);
-        if (distanceToTarget <= DetectionRange)
-        {
-            _navigationAgent.TargetPosition = _target.GlobalPosition;
-            Vector3 nextPathPosition = _navigationAgent.GetNextPathPosition();
-            Vector3 direction = (nextPathPosition - GlobalPosition).Normalized();
-            Velocity = direction * Speed;
-            MoveAndSlide();
-        }
-    }
+			StateMachine.AddState(new WanderingState());
+			StateMachine.AddState(new ChasingState());
+			StateMachine.AddState(new InvestigatingState());
+
+			StateMachine.SetInitialState(MonsterStateNames.Wandering, this);
+		}
+
+		public Node3D FindVisibleTarget()
+		{
+			var players = GetTree().GetNodesInGroup("players");
+			foreach (Node player in players)
+			{
+				if (player is Node3D playerNode)
+				{
+					Vector3 directionToPlayer = (playerNode.GlobalPosition - GlobalPosition).Normalized();
+					Raycast.GlobalTransform = new Transform3D(Basis.Identity, GlobalPosition);
+					Raycast.TargetPosition = directionToPlayer * DetectionRange;
+					Raycast.ForceRaycastUpdate();
+					if (Raycast.IsColliding() && Raycast.GetCollider() == playerNode)
+					{
+						return playerNode;
+					}
+				}
+			}
+			return null;
+		}
+
+		public override void _Process(double delta)
+		{
+			StateMachine?.Update(this, delta);
+		}
+
+		public override void _PhysicsProcess(double delta)
+		{
+			StateMachine?.PhysicsUpdate(this, delta);
+		}
+	}
 }
