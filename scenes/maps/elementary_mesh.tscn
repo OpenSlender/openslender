@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://b6tewfanat3xt"]
 
-[ext_resource type="PackedScene" uid="uid://diuy4wj3l4w0v" path="res://map.fbx" id="1_x5w14"]
+[ext_resource type="PackedScene" uid="uid://diuy4wj3l4w0v" path="res://external/map.fbx" id="1_x5w14"]
 
 [node name="map" instance=ExtResource("1_x5w14")]
 
