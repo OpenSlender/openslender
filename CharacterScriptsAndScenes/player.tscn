@@ -72,3 +72,6 @@ offset_left = 17.0
 offset_top = 13.0
 offset_right = 57.0
 offset_bottom = 36.0
+
+[node name="SpotLight3D" type="SpotLight3D" parent="CameraPivot/Camera3D"]
+spot_range = 21.132
