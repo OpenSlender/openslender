@@ -1,10 +1,10 @@
 [gd_scene load_steps=31 format=3 uid="uid://qm4p8wwtntju"]
 
-[ext_resource type="PackedScene" uid="uid://diuy4wj3l4w0v" path="res://map.fbx" id="1_gmyl3"]
+[ext_resource type="PackedScene" uid="uid://diuy4wj3l4w0v" path="res://external/map.fbx" id="1_gmyl3"]
 [ext_resource type="PackedScene" uid="uid://b6tewfanat3xt" path="res://scenes/maps/elementary_mesh.tscn" id="2_utd8u"]
-[ext_resource type="ArrayMesh" uid="uid://ou0xqbk3vwhv" path="res://collision.obj" id="2_xgu5s"]
+[ext_resource type="ArrayMesh" uid="uid://ou0xqbk3vwhv" path="res://external/collision.obj" id="2_xgu5s"]
 [ext_resource type="PackedScene" uid="uid://4s5l0lcm7727" path="res://CharacterScriptsAndScenes/player.tscn" id="2_ytl0e"]
-[ext_resource type="Texture2D" uid="uid://c232cwpvjsci5" path="res://materials/swamp/nature/swampleafpile001.tga" id="3_mwg6n"]
+[ext_resource type="Texture2D" uid="uid://c232cwpvjsci5" path="res://external/materials/swamp/nature/swampleafpile001.tga" id="3_mwg6n"]
 [ext_resource type="Script" uid="uid://ceup61jgjcehk" path="res://scripts/monster/Monster.cs" id="4_xgu5s"]
 [ext_resource type="VoxelGIData" uid="uid://cbkk3r8b18o3u" path="res://scenes/maps/elementary.VoxelGI_data.res" id="6_qipuq"]
 [ext_resource type="Shader" uid="uid://cvd0x7lon1ur6" path="res://addons/sky_3d/shaders/SkyMaterial.gdshader" id="7_0ts0j"]
@@ -54,7 +54,7 @@ shader_parameter/atm_darkness = 0.5
 shader_parameter/atm_sun_intensity = 18.0
 shader_parameter/atm_day_tint = Color(0.807843, 0.909804, 1, 1)
 shader_parameter/atm_horizon_light_tint = Color(0.980392, 0.635294, 0.462745, 1)
-shader_parameter/atm_night_tint = Color(0.062834, 0.0745243, 0.0935205, 0.372621)
+shader_parameter/atm_night_tint = Color(0.0628337, 0.0745239, 0.0935201, 0.37262)
 shader_parameter/atm_level_params = Vector3(1, 0, 0)
 shader_parameter/atm_thickness = 0.7
 shader_parameter/atm_beta_ray = Vector3(5.80454e-06, 1.35629e-05, 3.31126e-05)
@@ -95,8 +95,8 @@ shader_parameter/cirrus_sky_tint_fade = 0.5
 shader_parameter/cirrus_intensity = 10.0
 shader_parameter/cirrus_size = 1.0
 shader_parameter/cirrus_uv = Vector2(0.16, 0.11)
-shader_parameter/cirrus_position1 = Vector2(0.931887, 0.931887)
-shader_parameter/cirrus_position2 = Vector2(0.931887, 0.931887)
+shader_parameter/cirrus_position1 = Vector2(0.120952, 0.120952)
+shader_parameter/cirrus_position2 = Vector2(0.120952, 0.120952)
 shader_parameter/cirrus_day_color = Color(0.824, 0.875, 1, 1)
 shader_parameter/cirrus_horizon_light_color = Color(0.98, 0.43, 0.15, 1)
 shader_parameter/cirrus_night_color = Color(0.09, 0.094, 0.129, 1)
@@ -109,7 +109,7 @@ shader_parameter/cumulus_noise_freq = 2.7
 shader_parameter/cumulus_sky_tint_fade = 0.0
 shader_parameter/cumulus_intensity = 0.6
 shader_parameter/cumulus_size = 0.5
-shader_parameter/cumulus_position = Vector2(4.65802, 4.65774)
+shader_parameter/cumulus_position = Vector2(0.60482, 0.604761)
 shader_parameter/cumulus_texture = ExtResource("9_fclww")
 shader_parameter/cumulus_day_color = Color(0.823529, 0.87451, 1, 1)
 shader_parameter/cumulus_horizon_light_color = Color(0.98, 0.43, 0.15, 1)
@@ -122,7 +122,7 @@ shader_parameter/azimuthal_grid_rotation_offset = 0.03
 shader_parameter/show_equatorial_grid = false
 shader_parameter/equatorial_grid_color = Color(0, 0.75, 1, 1)
 shader_parameter/equatorial_grid_rotation_offset = 0.03
-shader_parameter/moon_matrix = Basis(-1.49012e-08, -0.779133, -0.626859, -0.482515, -0.549058, 0.682433, -0.875888, 0.302469, -0.375943)
+shader_parameter/moon_matrix = Basis(2.98023e-08, -0.779125, -0.626868, -0.482515, -0.549066, 0.682426, -0.875888, 0.302473, -0.37594)
 
 [sub_resource type="Sky" id="Sky_tnquq"]
 sky_material = SubResource("ShaderMaterial_1d65s")
@@ -131,7 +131,7 @@ sky_material = SubResource("ShaderMaterial_1d65s")
 background_mode = 2
 sky = SubResource("Sky_tnquq")
 ambient_light_source = 3
-ambient_light_color = Color(0.363095, 0.221346, 0.159153, 1)
+ambient_light_color = Color(0.363096, 0.221346, 0.159153, 1)
 ambient_light_sky_contribution = 0.7
 reflected_light_source = 2
 tonemap_mode = 3
@@ -237,7 +237,7 @@ light_color = Color(0.98, 0.523, 0.294, 1)
 light_energy = 0.0
 
 [node name="MoonLight" type="DirectionalLight3D" parent="Sky3D"]
-transform = Transform3D(0, -0.482515, -0.875888, -0.779133, -0.549058, 0.302469, -0.626859, 0.682433, -0.375943, -0.875888, 0.302469, -0.375943)
+transform = Transform3D(0, -0.482515, -0.875888, -0.779125, -0.549066, 0.302473, -0.626868, 0.682426, -0.37594, -0.875888, 0.302473, -0.37594)
 light_color = Color(0.572549, 0.776471, 0.956863, 1)
 light_energy = 0.0
 
