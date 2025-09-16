@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://cxvghomnuy4fh"]
 
-[ext_resource type="Script" uid="uid://b1gmxwhmaduty" path="res://Collectible.cs" id="1_rd2yi"]
+[ext_resource type="Script" path="res://Collectible.gd" id="1_rd2yi"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_dln23"]
 size = Vector3(0.5, 0.5, 0.05)

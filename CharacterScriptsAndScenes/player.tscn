@@ -1,18 +1,16 @@
 [gd_scene load_steps=7 format=3 uid="uid://4s5l0lcm7727"]
 
-[ext_resource type="Script" uid="uid://c8s1aundn0c5q" path="res://CharacterScriptsAndScenes/Player.cs" id="1_4flbx"]
-[ext_resource type="Script" uid="uid://b5om0xg6wj41m" path="res://CharacterScriptsAndScenes/InteractRay.cs" id="2_yselb"]
-[ext_resource type="Script" uid="uid://bqocs8f5d0f0o" path="res://CharacterScriptsAndScenes/Crosshair.cs" id="3_dx7ck"]
-[ext_resource type="Script" uid="uid://lc3li1aqnf6u" path="res://CharacterScriptsAndScenes/Hud.cs" id="4_xa05d"]
+[ext_resource type="Script" uid="uid://dv6h75kjn3mak" path="res://CharacterScriptsAndScenes/Player.gd" id="1_1xsn0"]
+[ext_resource type="Script" uid="uid://bulmflsik7553" path="res://CharacterScriptsAndScenes/InteractRay.gd" id="2_xa05d"]
+[ext_resource type="Script" uid="uid://bhoj10lxvsvnu" path="res://CharacterScriptsAndScenes/Crosshair.gd" id="3_rj7dc"]
+[ext_resource type="Script" uid="uid://i60v630jxpfg" path="res://CharacterScriptsAndScenes/Hud.gd" id="4_gqtha"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_mf4mk"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_37kl0"]
 
 [node name="Player" type="CharacterBody3D"]
-script = ExtResource("1_4flbx")
-CameraPivotPath = NodePath("CameraPivot")
-CameraPath = NodePath("CameraPivot/Camera3D")
+script = ExtResource("1_1xsn0")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 cast_shadow = 3
@@ -31,7 +29,7 @@ near = 0.2
 [node name="RayCast3D" type="RayCast3D" parent="CameraPivot/Camera3D" node_paths=PackedStringArray("Ray")]
 target_position = Vector3(0, 0, -3)
 collide_with_areas = true
-script = ExtResource("2_yselb")
+script = ExtResource("2_xa05d")
 Ray = NodePath(".")
 PromptLabelPath = NodePath("../PickupPrompt")
 
@@ -40,7 +38,7 @@ layout_mode = 3
 anchors_preset = 0
 offset_right = 1152.0
 offset_bottom = 648.0
-script = ExtResource("3_dx7ck")
+script = ExtResource("3_rj7dc")
 
 [node name="PickupPrompt" type="Label" parent="CameraPivot/Camera3D"]
 visible = false
@@ -64,7 +62,7 @@ layout_mode = 3
 anchors_preset = 0
 offset_right = 1152.0
 offset_bottom = 648.0
-script = ExtResource("4_xa05d")
+script = ExtResource("4_gqtha")
 
 [node name="CollectiblesLabel" type="Label" parent="CameraPivot/Camera3D/HUD"]
 layout_mode = 0

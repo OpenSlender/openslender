@@ -47,8 +47,6 @@ shadow_enabled = true
 
 [node name="Collectible" parent="." instance=ExtResource("2_8uh7m")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.255679, 1.94912, -6.0519)
-OneShot = null
 
 [node name="Collectible2" parent="." instance=ExtResource("2_8uh7m")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.20999, 1.87489, -6.3024)
-OneShot = null
