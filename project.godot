@@ -12,12 +12,12 @@ config_version=5
 
 config/name="openslender"
 run/main_scene="uid://dy84ytbqiv8pd"
-config/features=PackedStringArray("4.4", "C#", "Forward Plus")
+config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
 
-GameManager="*res://GameManager.cs"
+GameManager="*res://GameManager.gd"
 
 [display]
 
