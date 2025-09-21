@@ -5,7 +5,7 @@
 [ext_resource type="Script" uid="uid://bhoj10lxvsvnu" path="res://CharacterScriptsAndScenes/Crosshair.gd" id="3_rj7dc"]
 [ext_resource type="Script" uid="uid://i60v630jxpfg" path="res://CharacterScriptsAndScenes/Hud.gd" id="4_gqtha"]
 [ext_resource type="Script" uid="uid://imvuqcbdxb7j" path="res://CharacterScriptsAndScenes/spot_light_3d.gd" id="5_rj7dc"]
-[ext_resource type="PackedScene" uid="uid://c80jw1hod82ba" path="res://flashlight.fbx" id="6_gqtha"]
+[ext_resource type="PackedScene" uid="uid://yetd8dggsq57" path="res://flashlight.tscn" id="6_gqtha"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_mf4mk"]
 
@@ -89,4 +89,4 @@ script = ExtResource("5_rj7dc")
 [node name="Timer2" type="Timer" parent="CameraPivot/Camera3D/SpotLight3D"]
 
 [node name="flashlight" parent="CameraPivot/Camera3D" instance=ExtResource("6_gqtha")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.588507, -0.37392, -0.380057)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.452026, -0.302386, -0.594319)

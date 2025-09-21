@@ -1,48 +1,42 @@
-[gd_scene load_steps=7 format=3 uid="uid://ur5bi5k6wfdv"]
+[gd_scene load_steps=6 format=3 uid="uid://yetd8dggsq57"]
 
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_0kh7f"]
+[ext_resource type="PackedScene" uid="uid://c80jw1hod82ba" path="res://flashlight.fbx" id="1_nnxok"]
+[ext_resource type="Script" uid="uid://h0ybp0gupsh8" path="res://button_press.gd" id="2_h3kvc"]
 
-[sub_resource type="Sky" id="Sky_nnxok"]
-sky_material = SubResource("ProceduralSkyMaterial_0kh7f")
-process_mode = 1
+[sub_resource type="Animation" id="Animation_btnnp"]
+length = 0.001
+tracks/0/type = "position_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0.0612106, -0.0620275)
 
-[sub_resource type="Environment" id="Environment_h3kvc"]
-background_mode = 2
-background_energy_multiplier = 0.51
-sky = SubResource("Sky_nnxok")
+[sub_resource type="Animation" id="Animation_wm4p2"]
+resource_name = "button_push"
+length = 0.15
+tracks/0/type = "position_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0.0612106, -0.0620275, 0.0666, 1, 0, 0.0567325, -0.0620275, 0.1332, 1, 0, 0.0612106, -0.0620275)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_nnxok"]
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_yxo4c"]
+_data = {
+&"RESET": SubResource("Animation_btnnp"),
+&"button_push": SubResource("Animation_wm4p2")
+}
 
-[sub_resource type="BoxMesh" id="BoxMesh_h3kvc"]
+[node name="flashlight" instance=ExtResource("1_nnxok")]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nnxok"]
+[node name="Cube" parent="." index="0"]
+transform = Transform3D(100, 0, 0, 0, -2.49886e-05, 51.7732, 0, -209.619, -6.17184e-06, 0, 0.0612106, -0.0620275)
 
-[node name="Node3D" type="Node3D"]
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_h3kvc")
-
-[node name="StaticBody3D" type="StaticBody3D" parent="."]
-transform = Transform3D(3.24375, 0, -0.201465, 0, 3.25, 0, 0.201465, 0, 3.24375, 0, 0, 2.45411)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
-shape = SubResource("BoxShape3D_nnxok")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D/CollisionShape3D"]
-transform = Transform3D(0.051029, 0, -0.998697, 0, 1, 0, 0.998697, 0, 0.051029, -0.0106037, 0, -0.170729)
-mesh = SubResource("BoxMesh_h3kvc")
-surface_material_override/0 = SubResource("StandardMaterial3D_nnxok")
-
-[node name="StaticBody3D" type="StaticBody3D" parent="StaticBody3D"]
-transform = Transform3D(3.24375, 0, -0.201465, 0, 3.25, 0, 0.201465, 0, 3.24375, 0.0243018, 0, 2.84539)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D/StaticBody3D"]
-shape = SubResource("BoxShape3D_nnxok")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D/StaticBody3D/CollisionShape3D"]
-transform = Transform3D(0.051029, 0, -0.998697, 0, 1, 0, 0.998697, 0, 0.051029, 0, 0, 0)
-mesh = SubResource("BoxMesh_h3kvc")
-
-[node name="Camera3D2" type="Camera3D" parent="."]
-transform = Transform3D(-0.85633, 0, 0.516429, 0, 1, 0, -0.516429, 0, -0.85633, 4.6945, 0.525826, -7.43295)
-fov = 71.6
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Cube" index="0"]
+libraries = {
+&"": SubResource("AnimationLibrary_yxo4c")
+}
+script = ExtResource("2_h3kvc")
