@@ -1,7 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://yetd8dggsq57"]
+[gd_scene load_steps=8 format=3 uid="uid://yetd8dggsq57"]
 
 [ext_resource type="PackedScene" uid="uid://c80jw1hod82ba" path="res://flashlight.fbx" id="1_nnxok"]
 [ext_resource type="Script" uid="uid://h0ybp0gupsh8" path="res://button_press.gd" id="2_h3kvc"]
+[ext_resource type="AudioStream" uid="uid://d0ao01keio8nx" path="res://button-press-382713.mp3" id="3_btnnp"]
+[ext_resource type="Script" uid="uid://dq1ll7yi5wab7" path="res://audio_stream_player.gd" id="4_yxo4c"]
 
 [sub_resource type="Animation" id="Animation_btnnp"]
 length = 0.001
@@ -40,3 +42,8 @@ libraries = {
 &"": SubResource("AnimationLibrary_yxo4c")
 }
 script = ExtResource("2_h3kvc")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Cube" index="1"]
+stream = ExtResource("3_btnnp")
+volume_db = -2.811
+script = ExtResource("4_yxo4c")
