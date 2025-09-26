@@ -1,9 +1,11 @@
-[gd_scene load_steps=7 format=3 uid="uid://4s5l0lcm7727"]
+[gd_scene load_steps=9 format=3 uid="uid://4s5l0lcm7727"]
 
 [ext_resource type="Script" uid="uid://dv6h75kjn3mak" path="res://CharacterScriptsAndScenes/Player.gd" id="1_1xsn0"]
 [ext_resource type="Script" uid="uid://bulmflsik7553" path="res://CharacterScriptsAndScenes/InteractRay.gd" id="2_xa05d"]
 [ext_resource type="Script" uid="uid://bhoj10lxvsvnu" path="res://CharacterScriptsAndScenes/Crosshair.gd" id="3_rj7dc"]
 [ext_resource type="Script" uid="uid://i60v630jxpfg" path="res://CharacterScriptsAndScenes/Hud.gd" id="4_gqtha"]
+[ext_resource type="Script" uid="uid://imvuqcbdxb7j" path="res://CharacterScriptsAndScenes/spot_light_3d.gd" id="5_rj7dc"]
+[ext_resource type="PackedScene" uid="uid://yetd8dggsq57" path="res://flashlight.tscn" id="6_gqtha"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_mf4mk"]
 
@@ -23,7 +25,6 @@ shape = SubResource("CapsuleShape3D_37kl0")
 
 [node name="Camera3D" type="Camera3D" parent="CameraPivot"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.51074, 0)
-fov = 105.5
 near = 0.2
 
 [node name="RayCast3D" type="RayCast3D" parent="CameraPivot/Camera3D" node_paths=PackedStringArray("Ray")]
@@ -72,4 +73,20 @@ offset_right = 57.0
 offset_bottom = 36.0
 
 [node name="SpotLight3D" type="SpotLight3D" parent="CameraPivot/Camera3D"]
-spot_range = 21.132
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00119373, -0.00350064, 0.00024128)
+light_energy = 4.394
+light_indirect_energy = 7.626
+shadow_enabled = true
+distance_fade_enabled = true
+spot_range = 37.557
+spot_attenuation = -0.02
+spot_angle = 27.25
+spot_angle_attenuation = 2.37841
+script = ExtResource("5_rj7dc")
+
+[node name="Timer" type="Timer" parent="CameraPivot/Camera3D/SpotLight3D"]
+
+[node name="Timer2" type="Timer" parent="CameraPivot/Camera3D/SpotLight3D"]
+
+[node name="flashlight" parent="CameraPivot/Camera3D" instance=ExtResource("6_gqtha")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.452026, -0.302386, -0.594319)
