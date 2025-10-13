@@ -45,5 +45,5 @@ script = ExtResource("2_h3kvc")
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Cube" index="1"]
 stream = ExtResource("3_btnnp")
-volume_db = -2.811
+volume_db = -30.0
 script = ExtResource("4_yxo4c")

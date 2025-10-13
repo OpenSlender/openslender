@@ -1,5 +1,5 @@
 @tool
-class_name PlayerSettingsGD
+class_name PlayerSettings
 extends Resource
 
 @export var walk_speed: float = 5.0

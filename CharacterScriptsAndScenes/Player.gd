@@ -1,13 +1,14 @@
 extends CharacterBody3D
 
-const PLAYER_GROUP = "player"
-const DEBUG_CANVAS_LAYER_NAME = "DebugCanvasLayer"
-const DEBUG_CANVAS_LAYER_LAYER = 100
+const PLAYER_GROUP: String = "player"
+const DEBUG_CANVAS_LAYER_NAME: String = "DebugCanvasLayer"
+const DEBUG_CANVAS_LAYER_LAYER: int = 100
 
 @onready var _collision_shape: CollisionShape3D = $CollisionShape3D
 @onready var _mesh_instance: MeshInstance3D = $MeshInstance3D
 @onready var _camera_pivot: Node3D = $CameraPivot
-@export var settings: PlayerSettingsGD
+@export var settings: PlayerSettings
+@export var is_local: bool = true
 var _pitch := 0.0
 
 var _is_crouching := false
@@ -30,7 +31,7 @@ func _ready() -> void:
 	add_to_group(PLAYER_GROUP)
 	
 	if settings == null:
-		settings = PlayerSettingsGD.new()
+		settings = PlayerSettings.new()
 	
 	_capsule_shape = _collision_shape.shape as CapsuleShape3D
 	_normal_capsule_height = _capsule_shape.height
@@ -38,9 +39,15 @@ func _ready() -> void:
 	_capsule_mesh = _mesh_instance.mesh as CapsuleMesh
 	_crouch_camera_height = settings.crouch_camera_height
 	_camera_transition_speed = settings.camera_transition_speed
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	_initialize_state_machine()
-	call_deferred("_initialize_debug_overlay")
+	
+	if is_local:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		_initialize_state_machine()
+		call_deferred("_initialize_debug_overlay")
+	else:
+		set_process(false)
+		set_physics_process(false)
+		set_process_input(false)
 
 func _initialize_state_machine() -> void:
 	state_machine = StateMachine.new()
@@ -74,6 +81,8 @@ func _create_debug_overlay_control() -> void:
 	_debug_overlay.set_player(self)
 
 func _input(event: InputEvent) -> void:
+	if not is_local:
+		return
 	if Input.is_action_just_pressed("ui_cancel"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if event is InputEventKey and event.pressed and event.keycode == KEY_F3:

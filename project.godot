@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="openslender"
-run/main_scene="uid://dy84ytbqiv8pd"
+run/main_scene="res://scenes/entry.tscn"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
 

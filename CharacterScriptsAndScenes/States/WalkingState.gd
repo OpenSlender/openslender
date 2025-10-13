@@ -13,7 +13,7 @@ func physics_update(player, delta: float) -> void:
 	var input_dir := _read_input_2d()
 	if _try_start_jump(player): return
 	if _try_start_crouch(player): return
-
+	
 	if Input.is_action_pressed("run"):
 		player.state_machine.change_state(StateNames.States.Running, player)
 		return
