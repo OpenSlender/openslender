@@ -19,6 +19,27 @@ func _ready() -> void:
 	multiplayer.peer_connected.connect(_on_player_connected)
 	multiplayer.peer_disconnected.connect(_on_player_disconnected)
 	setup_update_timer()
+	
+	call_deferred("load_game_map")
+	
+func load_game_map() -> void:
+	print("Loading game map on server...")
+	var game_scene: PackedScene = load("res://test.tscn")
+	var game_instance = game_scene.instantiate()
+	get_tree().root.add_child(game_instance)
+	
+	call_deferred("initialize_collectibles")
+	
+func initialize_collectibles() -> void:
+	print("Initializing collectibles...")
+	
+	var collectible_nodes: Array[Node] = get_tree().get_nodes_in_group("collectibles")
+	
+	for i in range(collectible_nodes.size()):
+		collectibles[i] = false
+		
+	if GameManager:
+		GameManager.total_collectibles = collectibles.size()
 
 func start_server() -> void:
 	server = ENetMultiplayerPeer.new()
