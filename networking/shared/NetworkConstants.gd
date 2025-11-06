@@ -1,0 +1,12 @@
+extends Node
+
+const DEFAULT_SERVER_PORT = 7777
+const DEFAULT_SERVER_ADDRESS = "127.0.0.1"
+const MAX_PLAYERS = 10
+
+enum NetworkMode {
+	CLIENT,
+	SERVER,
+	DEDICATED_SERVER
+}
+
