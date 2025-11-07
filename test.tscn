@@ -1,6 +1,6 @@
 [gd_scene load_steps=9 format=3 uid="uid://dy84ytbqiv8pd"]
 
-[ext_resource type="PackedScene" uid="uid://4s5l0lcm7727" path="res://CharacterScriptsAndScenes/player.tscn" id="1_37kl0"]
+[ext_resource type="Script" uid="uid://bv6ussgpgit42" path="res://networking/client/GameWorld.gd" id="1_game_world"]
 [ext_resource type="PackedScene" uid="uid://cxvghomnuy4fh" path="res://collectible.tscn" id="2_8uh7m"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_37kl0"]
@@ -23,6 +23,7 @@ sky = SubResource("Sky_8uh7m")
 ambient_light_source = 3
 
 [node name="World" type="Node3D"]
+script = ExtResource("1_game_world")
 
 [node name="Floor" type="Node3D" parent="."]
 
@@ -35,8 +36,7 @@ mesh = SubResource("BoxMesh_mf4mk")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/StaticBody3D"]
 shape = SubResource("BoxShape3D_37kl0")
 
-[node name="Player" parent="." instance=ExtResource("1_37kl0")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.67051, 0)
+[node name="Players" type="Node3D" parent="."]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_6uqi0")

@@ -11,6 +11,7 @@ signal connection_succeeded()
 signal connection_failed()
 signal server_disconnected()
 signal player_list_updated(player_ids: Array)
+var _cached_player_ids: Array = []
 
 func _ready() -> void:
 	multiplayer.connected_to_server.connect(_on_connected_to_server)
@@ -43,6 +44,7 @@ func disconnect_from_server() -> void:
 		peer.close()
 		peer = null
 	connected = false
+	_cached_player_ids.clear()
 	multiplayer.multiplayer_peer = null
 	print("Disconnected from server")
 
@@ -56,12 +58,14 @@ func _on_connection_failed() -> void:
 	print("Failed to connect to server")
 	connected = false
 	peer = null
+	_cached_player_ids.clear()
 	connection_failed.emit()
 
 func _on_server_disconnected() -> void:
 	print("Disconnected from server")
 	connected = false
 	peer = null
+	_cached_player_ids.clear()
 	server_disconnected.emit()
 
 func _on_player_connected(peer_id: int) -> void:
@@ -76,6 +80,7 @@ func _request_player_list() -> void:
 	if connected:
 		var player_ids = multiplayer.get_peers()
 		player_ids.append(multiplayer.get_unique_id())
+		_cached_player_ids = player_ids.duplicate()
 		player_list_updated.emit(player_ids)
 
 func get_my_peer_id() -> int:
@@ -83,3 +88,9 @@ func get_my_peer_id() -> int:
 		return multiplayer.get_unique_id()
 	return -1
 
+func get_current_player_ids() -> Array:
+	if _cached_player_ids.is_empty() and connected:
+		var player_ids = multiplayer.get_peers()
+		player_ids.append(multiplayer.get_unique_id())
+		return player_ids
+	return _cached_player_ids.duplicate()
