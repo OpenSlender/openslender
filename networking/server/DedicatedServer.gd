@@ -21,6 +21,15 @@ func _ready() -> void:
 		game_state_manager.name = "GameStateManager"
 		add_child(game_state_manager)
 
+		# Register with NetworkRegistry for stable discovery
+		if has_node("/root/NetworkRegistry"):
+			get_node("/root/NetworkRegistry").register_game_state_manager(game_state_manager)
+
+func _exit_tree() -> void:
+	# Unregister from NetworkRegistry on cleanup
+	if has_node("/root/NetworkRegistry"):
+		get_node("/root/NetworkRegistry").unregister_game_state_manager()
+
 func start_server(port: int = DEFAULT_PORT, max_players: int = MAX_PLAYERS) -> bool:
 	peer = ENetMultiplayerPeer.new()
 	var error = peer.create_server(port, max_players)
