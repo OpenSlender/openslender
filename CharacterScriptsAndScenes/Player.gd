@@ -183,9 +183,14 @@ func set_remote_peer_ids(peer_ids: Array) -> void:
 func send_transform_to_peers(peer_ids: Array = []) -> void:
 	if !is_local_player:
 		return
-	# Use broadcast RPC instead of individual messages to reduce O(n²) to O(n)
-	# Receivers will filter based on sender peer_id
-	rpc("_rpc_receive_remote_transform", global_transform, velocity, _pitch, network_peer_id)
+	if peer_ids.is_empty():
+		peer_ids = remote_peer_ids
+	if peer_ids.is_empty():
+		return
+	for peer_id in peer_ids:
+		if peer_id == network_peer_id or peer_id == SERVER_PEER_ID:
+			continue
+		rpc_id(peer_id, "_rpc_receive_remote_transform", global_transform, velocity, _pitch)
 
 func set_flashlight_visible(visible_state: bool) -> void:
 	if _flashlight_visible == visible_state:
@@ -201,8 +206,14 @@ func set_flashlight_visible(visible_state: bool) -> void:
 func send_flashlight_state_to_peers(peer_ids: Array = []) -> void:
 	if !is_local_player:
 		return
-	# Use broadcast RPC instead of individual messages
-	rpc("_rpc_receive_flashlight_state", _flashlight_visible, network_peer_id)
+	if peer_ids.is_empty():
+		peer_ids = remote_peer_ids
+	if peer_ids.is_empty():
+		return
+	for peer_id in peer_ids:
+		if peer_id == network_peer_id or peer_id == SERVER_PEER_ID:
+			continue
+		rpc_id(peer_id, "_rpc_receive_flashlight_state", _flashlight_visible)
 
 func release_input_focus() -> void:
 	if is_local_player:
@@ -260,9 +271,8 @@ func _apply_remote_visual_state() -> void:
 		_flashlight.visible = _flashlight_visible
 
 @rpc("any_peer", "call_local", "unreliable")
-func _rpc_receive_remote_transform(remote_transform: Transform3D, remote_velocity: Vector3, remote_pitch: float, sender_peer_id: int) -> void:
-	# Ignore if this is the local player or if sender doesn't match this player's network ID
-	if is_local_player or sender_peer_id != network_peer_id:
+func _rpc_receive_remote_transform(remote_transform: Transform3D, remote_velocity: Vector3, remote_pitch: float) -> void:
+	if is_local_player:
 		return
 	_target_remote_transform = remote_transform
 	_target_remote_velocity = remote_velocity
@@ -270,9 +280,8 @@ func _rpc_receive_remote_transform(remote_transform: Transform3D, remote_velocit
 	_has_remote_target = true
 
 @rpc("any_peer", "call_local", "reliable")
-func _rpc_receive_flashlight_state(flashlight_visible: bool, sender_peer_id: int) -> void:
-	# Ignore if this is the local player or if sender doesn't match this player's network ID
-	if is_local_player or sender_peer_id != network_peer_id:
+func _rpc_receive_flashlight_state(flashlight_visible: bool) -> void:
+	if is_local_player:
 		return
 	_target_remote_flashlight_visible = flashlight_visible
 	if _flashlight:
