@@ -16,14 +16,25 @@ func _ready() -> void:
 
 	# Create GameStateManager
 	var GameStateManagerScript = load("res://networking/server/GameStateManager.gd")
-	if GameStateManagerScript:
-		game_state_manager = GameStateManagerScript.new()
-		game_state_manager.name = "GameStateManager"
-		add_child(game_state_manager)
+	if not GameStateManagerScript:
+		push_error("[DedicatedServer] Failed to load GameStateManager script")
+		get_tree().quit(1)
+		return
 
-		# Register with NetworkRegistry for stable discovery
-		if has_node("/root/NetworkRegistry"):
-			get_node("/root/NetworkRegistry").register_game_state_manager(game_state_manager)
+	game_state_manager = GameStateManagerScript.new()
+	if not game_state_manager:
+		push_error("[DedicatedServer] Failed to instantiate GameStateManager")
+		get_tree().quit(1)
+		return
+
+	game_state_manager.name = "GameStateManager"
+	add_child(game_state_manager)
+
+	# Register with NetworkRegistry for stable discovery
+	if has_node("/root/NetworkRegistry"):
+		get_node("/root/NetworkRegistry").register_game_state_manager(game_state_manager)
+	else:
+		push_warning("[DedicatedServer] NetworkRegistry not found, GameStateManager not registered")
 
 func _exit_tree() -> void:
 	# Unregister from NetworkRegistry on cleanup
