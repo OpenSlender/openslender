@@ -1,6 +1,7 @@
 extends Node3D
 
 const PLAYER_SCENE: PackedScene = preload("res://CharacterScriptsAndScenes/player.tscn")
+const COLLECTIBLE_SCENE: PackedScene = preload("res://collectible.tscn")
 const SERVER_PEER_ID := 1
 
 @onready var players_root: Node3D = $Players
@@ -9,6 +10,8 @@ var players: Dictionary = {}
 var local_peer_id: int = 0
 var local_player: CharacterBody3D
 var tracked_peer_ids: Array = []
+var collectibles: Dictionary = {}  # {id: NetworkedCollectible}
+var collectibles_root: Node3D
 
 func _ready() -> void:
 	local_peer_id = multiplayer.get_unique_id()
@@ -16,6 +19,12 @@ func _ready() -> void:
 		tracked_peer_ids = [local_peer_id]
 	elif !tracked_peer_ids.has(local_peer_id):
 		tracked_peer_ids.append(local_peer_id)
+
+	# Create collectibles root node
+	collectibles_root = Node3D.new()
+	collectibles_root.name = "Collectibles"
+	add_child(collectibles_root)
+
 	call_deferred("_sync_players")
 
 func update_player_list(peer_ids: Array) -> void:
@@ -38,6 +47,12 @@ func shutdown() -> void:
 	players.clear()
 	local_player = null
 	tracked_peer_ids.clear()
+
+	# Clean up collectibles
+	for collectible in collectibles.values():
+		if is_instance_valid(collectible):
+			collectible.queue_free()
+	collectibles.clear()
 
 func _sync_players() -> void:
 	if !players_root:
