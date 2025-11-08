@@ -18,6 +18,11 @@ func set_collectible_id(id: int) -> void:
 
 # Override try_pickup to send request to server instead of local collection
 func try_pickup() -> void:
+	# Validate collectible_id has been assigned before proceeding
+	if collectible_id == -1:
+		push_warning("[NetworkedCollectible] Attempted to pickup collectible with unassigned ID (-1)")
+		return
+
 	print("[NetworkedCollectible] try_pickup() called for ID %d (collected=%s, pending=%s, network_spawned=%s)" % [collectible_id, _collected, _pickup_pending, is_network_spawned])
 
 	if _collected or _pickup_pending:
@@ -101,6 +106,11 @@ func _on_pickup_timeout() -> void:
 	_cancel_pickup_request()
 
 func _cancel_pickup_request() -> void:
+	# Safety check: don't access node properties if removed during timeout
+	if not is_inside_tree() or is_queued_for_deletion():
+		_cancel_pickup_timeout()
+		return
+
 	_pickup_pending = false
 	visible = true
 	monitoring = true
