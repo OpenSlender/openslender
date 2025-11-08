@@ -16,53 +16,42 @@ func set_collectible_id(id: int) -> void:
 
 # Override try_pickup to send request to server instead of local collection
 func try_pickup() -> void:
+	print("[NetworkedCollectible] try_pickup() called for ID %d (collected=%s, pending=%s, network_spawned=%s)" % [collectible_id, _collected, _pickup_pending, is_network_spawned])
+
 	if _collected or _pickup_pending:
 		print("[NetworkedCollectible] Pickup already in progress for ID %d" % collectible_id)
 		return
 
 	if not is_network_spawned:
-		push_warning("[NetworkedCollectible] Attempted pickup of non-networked collectible")
+		push_warning("[NetworkedCollectible] Attempted pickup of non-networked collectible ID %d" % collectible_id)
 		return
 
 	if not multiplayer.has_multiplayer_peer():
-		push_warning("[NetworkedCollectible] No multiplayer peer connected")
+		push_warning("[NetworkedCollectible] No multiplayer peer connected for ID %d" % collectible_id)
 		return
 
-	print("[NetworkedCollectible] Requesting pickup of collectible %d" % collectible_id)
+	print("[NetworkedCollectible] Processing pickup request for collectible %d" % collectible_id)
 
 	# Mark as pending to prevent double-pickup (don't set _collected yet)
 	_pickup_pending = true
 	set_highlighted(false)
 	monitoring = false  # Stop detecting collisions immediately
 
-	# Immediately hide the collectible for instant client feedback
-	# (Server still has authority - if pickup fails, server can respawn it)
-
-	# Hide the mesh instance explicitly
-	if _mesh_instance:
-		_mesh_instance.visible = false
-
-	# Hide the outline instance explicitly
-	if _outline_instance:
-		_outline_instance.visible = false
-
-	# Hide all children
-	for child in get_children():
-		if child is VisualInstance3D or child is MeshInstance3D:
-			child.visible = false
-
-	# Hide self
+	# Hide immediately for instant client feedback (same as parent class approach)
+	# Server still has authority - if pickup fails, server can respawn it
 	visible = false
 
-	print("[NetworkedCollectible] Collectible %d hidden immediately (client-side)" % collectible_id)
+	print("[NetworkedCollectible] Collectible %d hidden immediately (visible=%s)" % [collectible_id, visible])
 
 	# Send pickup request to server via CollectibleSync
 	var collectible_sync = get_node_or_null("/root/CollectibleSync")
 	if collectible_sync:
+		print("[NetworkedCollectible] Sending RPC for collectible %d" % collectible_id)
 		collectible_sync.rpc_id(SERVER_PEER_ID, "request_pickup", collectible_id)
 	else:
 		push_error("[NetworkedCollectible] CollectibleSync autoload not found!")
 		_pickup_pending = false  # Reset if request failed
+		visible = true  # Show again if RPC failed
 
 # Called directly (not RPC) to confirm collection
 func confirm_collection() -> void:
