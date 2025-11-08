@@ -6,8 +6,10 @@ extends Collectible
 var collectible_id: int = -1
 var is_network_spawned := false
 var _pickup_pending := false  # Prevents double-pickup while waiting for server
+var _pickup_timeout_timer: Timer = null
 
 const SERVER_PEER_ID := 1
+const PICKUP_TIMEOUT_SECONDS := 3.0
 
 func set_collectible_id(id: int) -> void:
 	collectible_id = id
@@ -48,10 +50,12 @@ func try_pickup() -> void:
 	if collectible_sync:
 		print("[NetworkedCollectible] Sending RPC for collectible %d" % collectible_id)
 		collectible_sync.rpc_id(SERVER_PEER_ID, "request_pickup", collectible_id)
+
+		# Start timeout timer to recover if server doesn't respond
+		_start_pickup_timeout()
 	else:
 		push_error("[NetworkedCollectible] CollectibleSync autoload not found!")
-		_pickup_pending = false  # Reset if request failed
-		visible = true  # Show again if RPC failed
+		_cancel_pickup_request()  # Reset state if request failed
 
 # Called directly (not RPC) to confirm collection
 func confirm_collection() -> void:
@@ -61,14 +65,44 @@ func confirm_collection() -> void:
 
 	print("[NetworkedCollectible] Confirming collection for ID %d (server confirmation)" % collectible_id)
 
+	# Cancel timeout timer since server confirmed
+	_cancel_pickup_timeout()
+
 	_collected = true
 
 	# Visual hiding already done in try_pickup() for instant client feedback
 	# This method just handles final server confirmation and cleanup
 
 	if one_shot:
-		# Remove from parent immediately, then queue free
-		print("[NetworkedCollectible] Removing collectible %d from scene tree" % collectible_id)
-		if get_parent():
-			get_parent().remove_child(self)
+		# queue_free() handles removal automatically, no need for manual remove_child
+		print("[NetworkedCollectible] Queuing collectible %d for removal" % collectible_id)
 		queue_free()
+
+func _start_pickup_timeout() -> void:
+	_cancel_pickup_timeout()  # Clear any existing timer
+
+	_pickup_timeout_timer = Timer.new()
+	_pickup_timeout_timer.wait_time = PICKUP_TIMEOUT_SECONDS
+	_pickup_timeout_timer.one_shot = true
+	_pickup_timeout_timer.timeout.connect(_on_pickup_timeout)
+	add_child(_pickup_timeout_timer)
+	_pickup_timeout_timer.start()
+
+func _cancel_pickup_timeout() -> void:
+	if _pickup_timeout_timer:
+		_pickup_timeout_timer.queue_free()
+		_pickup_timeout_timer = null
+
+func _on_pickup_timeout() -> void:
+	if _collected:
+		return  # Server confirmed in time, nothing to do
+
+	push_warning("[NetworkedCollectible] Pickup request timed out for collectible %d, restoring" % collectible_id)
+	_cancel_pickup_request()
+
+func _cancel_pickup_request() -> void:
+	_pickup_pending = false
+	visible = true
+	monitoring = true
+	set_highlighted(false)
+	_cancel_pickup_timeout()

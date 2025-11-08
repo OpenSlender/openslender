@@ -55,8 +55,10 @@ func initialize_game_world(world_scene_path: String = "res://test.tscn") -> void
 	print("[GameStateManager] Initialized with %d collectibles" % total_collectibles)
 
 func _extract_collectible_positions(world_node: Node) -> void:
-	# Find all collectible spawn points in the scene
-	var spawn_point_nodes = _find_nodes_in_group(world_node, "collectible_spawn_point")
+	# Find all collectible spawn points in the scene using get_nodes_in_group
+	# Filter to only include nodes that are descendants of world_node
+	var all_spawn_points = get_tree().get_nodes_in_group("collectible_spawn_point")
+	var spawn_point_nodes = all_spawn_points.filter(func(node): return world_node.is_ancestor_of(node))
 
 	if spawn_point_nodes.is_empty():
 		push_warning("[GameStateManager] No collectible spawn points found in scene!")
@@ -81,19 +83,6 @@ func _extract_collectible_positions(world_node: Node) -> void:
 			"collected": false
 		}
 		print("[GameStateManager] Registered collectible %d at %s (spawn point)" % [id, spawn_point.global_position])
-
-func _find_nodes_in_group(node: Node, group_name: String) -> Array:
-	var result := []
-
-	# Check if current node is in the specified group
-	if node.is_in_group(group_name):
-		result.append(node)
-
-	# Recursively check children
-	for child in node.get_children():
-		result.append_array(_find_nodes_in_group(child, group_name))
-
-	return result
 
 # Called when a new player connects - send them the full game state
 func sync_game_state_to_player(peer_id: int) -> void:
