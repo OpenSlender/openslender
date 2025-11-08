@@ -107,3 +107,51 @@ func _spawn_position_for(peer_id: int) -> Vector3:
 	var angle := rng.randf_range(0.0, TAU)
 	var radius := rng.randf_range(2.0, 6.0)
 	return Vector3(cos(angle) * radius, 1.6, sin(angle) * radius)
+
+# Network RPC handlers for collectibles
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_spawn_collectible(collectible_id: int, position: Vector3, rotation: Vector3) -> void:
+	if collectibles.has(collectible_id):
+		print("[GameWorld] Collectible %d already exists" % collectible_id)
+		return
+
+	print("[GameWorld] Spawning collectible %d at %s" % [collectible_id, position])
+
+	# Load and attach the NetworkedCollectible script
+	var networked_collectible_script = load("res://NetworkedCollectible.gd")
+
+	# Instantiate collectible
+	var collectible = COLLECTIBLE_SCENE.instantiate()
+	collectible.name = "Collectible_%d" % collectible_id
+	collectible.set_script(networked_collectible_script)
+
+	# Add to scene first (required for global_position to work)
+	collectibles_root.add_child(collectible)
+
+	# Now set position and rotation
+	collectible.global_position = position
+	collectible.global_rotation = rotation
+
+	# Set the collectible ID
+	collectible.set_collectible_id(collectible_id)
+
+	collectibles[collectible_id] = collectible
+	print("[GameWorld] Collectible %d spawned successfully" % collectible_id)
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_collectible_collected(collectible_id: int, collector_peer_id: int, new_count: int, total: int) -> void:
+	print("[GameWorld] Collectible %d collected by player %d (count: %d/%d)" % [collectible_id, collector_peer_id, new_count, total])
+
+	# Remove the collectible from the scene
+	if collectibles.has(collectible_id):
+		print("[GameWorld] Found collectible %d in dictionary, removing..." % collectible_id)
+		var collectible = collectibles[collectible_id]
+		if is_instance_valid(collectible):
+			print("[GameWorld] Collectible is valid, calling confirm_collection()")
+			collectible.confirm_collection()
+		else:
+			print("[GameWorld] ERROR: Collectible %d is not valid" % collectible_id)
+		collectibles.erase(collectible_id)
+	else:
+		print("[GameWorld] ERROR: Collectible %d not found in dictionary. Available IDs: %s" % [collectible_id, collectibles.keys()])

@@ -1,7 +1,7 @@
 [gd_scene load_steps=9 format=3 uid="uid://dy84ytbqiv8pd"]
 
 [ext_resource type="Script" uid="uid://bv6ussgpgit42" path="res://networking/client/GameWorld.gd" id="1_game_world"]
-[ext_resource type="PackedScene" uid="uid://cxvghomnuy4fh" path="res://collectible.tscn" id="2_8uh7m"]
+[ext_resource type="PackedScene" uid="uid://b8vghomnuy4fh" path="res://collectible_spawn_point.tscn" id="2_spawn_point"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_37kl0"]
 albedo_color = Color(0.572988, 0.572988, 0.572988, 1)
@@ -45,8 +45,43 @@ environment = SubResource("Environment_6uqi0")
 transform = Transform3D(0.996291, -0.0341432, 0.0789857, -0.0789858, -0.727076, 0.681998, 0.034143, -0.685707, -0.727076, 0, 0, 0)
 shadow_enabled = true
 
-[node name="Collectible" parent="." instance=ExtResource("2_8uh7m")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.255679, 1.94912, -6.0519)
+[node name="CollectibleSpawnPoints" type="Node3D" parent="."]
 
-[node name="Collectible2" parent="." instance=ExtResource("2_8uh7m")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.20999, 1.87489, -6.3024)
+[node name="SpawnPoint1" parent="CollectibleSpawnPoints" instance=ExtResource("2_spawn_point")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 1.5, -7)
+
+[node name="SpawnPoint2" parent="CollectibleSpawnPoints" instance=ExtResource("2_spawn_point")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 1.5, 0)
+
+[node name="SpawnPoint3" parent="CollectibleSpawnPoints" instance=ExtResource("2_spawn_point")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 1.5, 7)
+
+[node name="SpawnPoint4" parent="CollectibleSpawnPoints" instance=ExtResource("2_spawn_point")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -7)
+
+[node name="SpawnPoint5" parent="CollectibleSpawnPoints" instance=ExtResource("2_spawn_point")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+
+[node name="SpawnPoint6" parent="CollectibleSpawnPoints" instance=ExtResource("2_spawn_point")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 7)
+
+[node name="SpawnPoint7" parent="CollectibleSpawnPoints" instance=ExtResource("2_spawn_point")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 1.5, -7)
+
+[node name="SpawnPoint8" parent="CollectibleSpawnPoints" instance=ExtResource("2_spawn_point")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 1.5, 0)
+
+[node name="SpawnPoint9" parent="CollectibleSpawnPoints" instance=ExtResource("2_spawn_point")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 1.5, 7)
+
+[node name="SpawnPoint10" parent="CollectibleSpawnPoints" instance=ExtResource("2_spawn_point")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.5, -4)
+
+[node name="SpawnPoint11" parent="CollectibleSpawnPoints" instance=ExtResource("2_spawn_point")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 1.5, -4)
+
+[node name="SpawnPoint12" parent="CollectibleSpawnPoints" instance=ExtResource("2_spawn_point")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.5, 4)
+
+[node name="SpawnPoint13" parent="CollectibleSpawnPoints" instance=ExtResource("2_spawn_point")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 1.5, 4)

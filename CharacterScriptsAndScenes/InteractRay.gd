@@ -38,7 +38,9 @@ func _process(_delta: float) -> void:
 		_promptLabel.visible = collectible != null
 
 	if collectible != null and Input.is_action_just_pressed("interact"):
+		print("[InteractRay] E pressed! Calling try_pickup() on collectible: %s" % collectible)
 		collectible.try_pickup()
+		print("[InteractRay] try_pickup() returned, clearing highlight")
 		if _currentHighlighted == collectible:
 			_currentHighlighted = null
 		if _promptLabel != null:

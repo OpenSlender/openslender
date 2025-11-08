@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://b8vghomnuy4fh"]
+
+[ext_resource type="Script" path="res://CollectibleSpawnPoint.gd" id="1_spawnpt"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_spawn"]
+radius = 0.2
+height = 0.4
+
+[node name="CollectibleSpawnPoint" type="Node3D"]
+script = ExtResource("1_spawnpt")
+
+[node name="EditorVisual" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_spawn")
