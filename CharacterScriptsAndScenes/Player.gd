@@ -190,7 +190,7 @@ func send_transform_to_peers(peer_ids: Array = []) -> void:
 	for peer_id in peer_ids:
 		if peer_id == network_peer_id or peer_id == SERVER_PEER_ID:
 			continue
-		rpc_id(peer_id, "_rpc_receive_remote_transform", global_transform, velocity, _pitch)
+		rpc_id(peer_id, "_rpc_receive_remote_transform", global_transform, velocity, _pitch, network_peer_id)
 
 func set_flashlight_visible(visible_state: bool) -> void:
 	if _flashlight_visible == visible_state:
@@ -213,7 +213,7 @@ func send_flashlight_state_to_peers(peer_ids: Array = []) -> void:
 	for peer_id in peer_ids:
 		if peer_id == network_peer_id or peer_id == SERVER_PEER_ID:
 			continue
-		rpc_id(peer_id, "_rpc_receive_flashlight_state", _flashlight_visible)
+		rpc_id(peer_id, "_rpc_receive_flashlight_state", _flashlight_visible, network_peer_id)
 
 func release_input_focus() -> void:
 	if is_local_player:
@@ -271,18 +271,32 @@ func _apply_remote_visual_state() -> void:
 		_flashlight.visible = _flashlight_visible
 
 @rpc("any_peer", "call_local", "unreliable")
-func _rpc_receive_remote_transform(remote_transform: Transform3D, remote_velocity: Vector3, remote_pitch: float) -> void:
+func _rpc_receive_remote_transform(remote_transform: Transform3D, remote_velocity: Vector3, remote_pitch: float, claimed_sender_id: int) -> void:
 	if is_local_player:
 		return
+
+	# Security: Verify the RPC sender matches the claimed sender ID
+	var actual_sender_id = multiplayer.get_remote_sender_id()
+	if actual_sender_id != claimed_sender_id:
+		push_warning("[Player] RPC impersonation attempt: actual sender %d claimed to be %d" % [actual_sender_id, claimed_sender_id])
+		return
+
 	_target_remote_transform = remote_transform
 	_target_remote_velocity = remote_velocity
 	_target_remote_pitch = remote_pitch
 	_has_remote_target = true
 
 @rpc("any_peer", "call_local", "reliable")
-func _rpc_receive_flashlight_state(flashlight_visible: bool) -> void:
+func _rpc_receive_flashlight_state(flashlight_visible: bool, claimed_sender_id: int) -> void:
 	if is_local_player:
 		return
+
+	# Security: Verify the RPC sender matches the claimed sender ID
+	var actual_sender_id = multiplayer.get_remote_sender_id()
+	if actual_sender_id != claimed_sender_id:
+		push_warning("[Player] RPC impersonation attempt: actual sender %d claimed to be %d" % [actual_sender_id, claimed_sender_id])
+		return
+
 	_target_remote_flashlight_visible = flashlight_visible
 	if _flashlight:
 		_flashlight.visible = flashlight_visible
