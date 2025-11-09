@@ -7,6 +7,12 @@ extends Node
 
 @rpc("authority", "call_remote", "reliable")
 func spawn_collectible(collectible_id: int, position: Vector3, rotation: Vector3) -> void:
+	# Security: Verify this RPC came from the server (authority)
+	var sender_id = multiplayer.get_remote_sender_id()
+	if sender_id != 1:  # SERVER_PEER_ID is always 1
+		push_warning("[CollectibleSync] Security: Rejected spawn_collectible from non-server peer %d" % sender_id)
+		return
+
 	# Called on client - route to GameWorld
 	print("[CollectibleSync] Received spawn_collectible RPC for ID %d at %s" % [collectible_id, position])
 	var game_world = get_node_or_null("/root/NetworkGameWorld")
@@ -21,6 +27,12 @@ func spawn_collectible(collectible_id: int, position: Vector3, rotation: Vector3
 
 @rpc("authority", "call_remote", "reliable")
 func collectible_collected(collectible_id: int, collector_peer_id: int, new_count: int, total: int) -> void:
+	# Security: Verify this RPC came from the server (authority)
+	var sender_id = multiplayer.get_remote_sender_id()
+	if sender_id != 1:  # SERVER_PEER_ID is always 1
+		push_warning("[CollectibleSync] Security: Rejected collectible_collected from non-server peer %d" % sender_id)
+		return
+
 	# Called on client - route to GameWorld
 	print("[CollectibleSync] Received collectible_collected RPC for ID %d (collected by peer %d)" % [collectible_id, collector_peer_id])
 	var game_world = get_node_or_null("/root/NetworkGameWorld")

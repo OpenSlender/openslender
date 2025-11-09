@@ -112,6 +112,12 @@ func _spawn_position_for(peer_id: int) -> Vector3:
 
 @rpc("authority", "call_remote", "reliable")
 func _rpc_spawn_collectible(collectible_id: int, position: Vector3, rotation: Vector3) -> void:
+	# Security: Verify this RPC actually came from the server
+	var sender_id = multiplayer.get_remote_sender_id()
+	if sender_id != SERVER_PEER_ID:
+		push_warning("[GameWorld] Security: Rejected _rpc_spawn_collectible from non-server peer %d (expected %d)" % [sender_id, SERVER_PEER_ID])
+		return
+
 	if collectibles.has(collectible_id):
 		print("[GameWorld] Collectible %d already exists" % collectible_id)
 		return
@@ -141,6 +147,12 @@ func _rpc_spawn_collectible(collectible_id: int, position: Vector3, rotation: Ve
 
 @rpc("authority", "call_remote", "reliable")
 func _rpc_collectible_collected(collectible_id: int, collector_peer_id: int, new_count: int, total: int) -> void:
+	# Security: Verify this RPC actually came from the server
+	var sender_id = multiplayer.get_remote_sender_id()
+	if sender_id != SERVER_PEER_ID:
+		push_warning("[GameWorld] Security: Rejected _rpc_collectible_collected from non-server peer %d (expected %d)" % [sender_id, SERVER_PEER_ID])
+		return
+
 	print("[GameWorld] Collectible %d collected by player %d (count: %d/%d)" % [collectible_id, collector_peer_id, new_count, total])
 
 	# Remove the collectible from the scene
