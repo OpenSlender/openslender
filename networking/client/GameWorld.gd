@@ -117,7 +117,22 @@ func _rpc_spawn_collectible(collectible_id: int, position: Vector3, rotation: Ve
 	if sender_id != SERVER_PEER_ID:
 		push_warning("[GameWorld] Security: Rejected _rpc_spawn_collectible from non-server peer %d (expected %d)" % [sender_id, SERVER_PEER_ID])
 		return
+	
+	spawn_collectible_local(collectible_id, position, rotation)
 
+@rpc("authority", "call_remote", "reliable")
+func _rpc_collectible_collected(collectible_id: int, collector_peer_id: int, new_count: int, total: int) -> void:
+	# Security: Verify this RPC actually came from the server
+	var sender_id = multiplayer.get_remote_sender_id()
+	if sender_id != SERVER_PEER_ID:
+		push_warning("[GameWorld] Security: Rejected _rpc_collectible_collected from non-server peer %d (expected %d)" % [sender_id, SERVER_PEER_ID])
+		return
+	
+	collectible_collected_local(collectible_id, collector_peer_id, new_count, total)
+
+# Helper methods (can be called directly without RPC validation)
+
+func spawn_collectible_local(collectible_id: int, position: Vector3, rotation: Vector3) -> void:
 	if collectibles.has(collectible_id):
 		print("[GameWorld] Collectible %d already exists" % collectible_id)
 		return
@@ -145,14 +160,7 @@ func _rpc_spawn_collectible(collectible_id: int, position: Vector3, rotation: Ve
 	collectibles[collectible_id] = collectible
 	print("[GameWorld] Collectible %d spawned successfully" % collectible_id)
 
-@rpc("authority", "call_remote", "reliable")
-func _rpc_collectible_collected(collectible_id: int, collector_peer_id: int, new_count: int, total: int) -> void:
-	# Security: Verify this RPC actually came from the server
-	var sender_id = multiplayer.get_remote_sender_id()
-	if sender_id != SERVER_PEER_ID:
-		push_warning("[GameWorld] Security: Rejected _rpc_collectible_collected from non-server peer %d (expected %d)" % [sender_id, SERVER_PEER_ID])
-		return
-
+func collectible_collected_local(collectible_id: int, collector_peer_id: int, new_count: int, total: int) -> void:
 	print("[GameWorld] Collectible %d collected by player %d (count: %d/%d)" % [collectible_id, collector_peer_id, new_count, total])
 
 	# Remove the collectible from the scene

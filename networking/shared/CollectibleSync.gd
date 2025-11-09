@@ -16,14 +16,14 @@ func spawn_collectible(collectible_id: int, position: Vector3, rotation: Vector3
 	# Called on client - route to GameWorld
 	print("[CollectibleSync] Received spawn_collectible RPC for ID %d at %s" % [collectible_id, position])
 	var game_world = get_node_or_null("/root/NetworkGameWorld")
-	if game_world and game_world.has_method("_rpc_spawn_collectible"):
+	if game_world and game_world.has_method("spawn_collectible_local"):
 		print("[CollectibleSync] Routing to GameWorld")
-		game_world._rpc_spawn_collectible(collectible_id, position, rotation)
+		game_world.spawn_collectible_local(collectible_id, position, rotation)
 	else:
-		print("[CollectibleSync] ERROR: GameWorld not found or missing _rpc_spawn_collectible method")
+		print("[CollectibleSync] ERROR: GameWorld not found or missing spawn_collectible_local method")
 		print("[CollectibleSync] GameWorld node: %s" % game_world)
 		if game_world:
-			print("[CollectibleSync] Has method: %s" % game_world.has_method("_rpc_spawn_collectible"))
+			print("[CollectibleSync] Has method: %s" % game_world.has_method("spawn_collectible_local"))
 
 @rpc("authority", "call_remote", "reliable")
 func collectible_collected(collectible_id: int, collector_peer_id: int, new_count: int, total: int) -> void:
@@ -36,9 +36,9 @@ func collectible_collected(collectible_id: int, collector_peer_id: int, new_coun
 	# Called on client - route to GameWorld
 	print("[CollectibleSync] Received collectible_collected RPC for ID %d (collected by peer %d)" % [collectible_id, collector_peer_id])
 	var game_world = get_node_or_null("/root/NetworkGameWorld")
-	if game_world and game_world.has_method("_rpc_collectible_collected"):
-		print("[CollectibleSync] Routing to GameWorld._rpc_collectible_collected")
-		game_world._rpc_collectible_collected(collectible_id, collector_peer_id, new_count, total)
+	if game_world and game_world.has_method("collectible_collected_local"):
+		print("[CollectibleSync] Routing to GameWorld.collectible_collected_local")
+		game_world.collectible_collected_local(collectible_id, collector_peer_id, new_count, total)
 	else:
 		print("[CollectibleSync] ERROR: GameWorld not found or missing method")
 		print("[CollectibleSync] GameWorld: %s" % game_world)
