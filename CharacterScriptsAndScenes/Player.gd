@@ -254,6 +254,8 @@ func _apply_local_visual_state() -> void:
 		_crosshair.show()
 	if _pickup_prompt:
 		_pickup_prompt.hide()
+	if _mesh_instance:
+		_mesh_instance.cast_shadow = MeshInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
 
 func _apply_remote_visual_state() -> void:
 	if _camera:
@@ -274,6 +276,8 @@ func _apply_remote_visual_state() -> void:
 	_target_remote_flashlight_visible = _flashlight_visible
 	if _flashlight:
 		_flashlight.visible = _flashlight_visible
+	if _mesh_instance:
+		_mesh_instance.cast_shadow = MeshInstance3D.SHADOW_CASTING_SETTING_ON
 
 @rpc("any_peer", "call_local", "unreliable")
 func _rpc_receive_remote_transform(remote_transform: Transform3D, remote_velocity: Vector3, remote_pitch: float) -> void:
