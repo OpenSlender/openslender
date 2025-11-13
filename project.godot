@@ -11,13 +11,15 @@ config_version=5
 [application]
 
 config/name="openslender"
-run/main_scene="uid://dy84ytbqiv8pd"
+run/main_scene="uid://bdn4bm27nbqsy"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
 
 GameManager="*res://GameManager.gd"
+NetworkRegistry="*res://networking/shared/NetworkRegistry.gd"
+CollectibleSync="*res://networking/shared/CollectibleSync.gd"
 
 [display]
 

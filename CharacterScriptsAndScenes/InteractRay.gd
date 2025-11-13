@@ -5,6 +5,7 @@ extends RayCast3D
 
 var _promptLabel: Label
 var _currentHighlighted
+var _player: CharacterBody3D
 
 func _ready() -> void:
 	if Ray == null:
@@ -15,7 +16,14 @@ func _ready() -> void:
 	if _promptLabel != null:
 		_promptLabel.visible = false
 
+	# Get player reference
+	_player = PlayerUtils.find_player_ancestor(self)
+
 func _process(_delta: float) -> void:
+	# Only process for local player
+	if _player == null or not _player.is_local_player:
+		return
+
 	var collectible = null
 
 	if Ray != null and Ray.is_colliding():

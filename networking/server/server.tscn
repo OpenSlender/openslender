@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://c8s4w71iqxq7a"]
+
+[ext_resource type="Script" path="res://networking/server/ServerLauncher.gd" id="1_j6y4o"]
+[ext_resource type="Script" path="res://networking/server/DedicatedServer.gd" id="2_h5j3k"]
+
+[node name="ServerLauncher" type="Node"]
+script = ExtResource("1_j6y4o")
+
+[node name="DedicatedServer" type="Node" parent="."]
+script = ExtResource("2_h5j3k")
+
