@@ -8,6 +8,10 @@ signal all_collectibles_collected
 
 var is_multiplayer_mode := false
 
+# Security: RPC validation bounds
+const MAX_COLLECTIBLE_ID := 100000
+const MAX_COLLECTIBLE_COUNT := 10000
+
 func _ready() -> void:
 	# Check if we're in multiplayer mode
 	is_multiplayer_mode = multiplayer.has_multiplayer_peer()
@@ -44,6 +48,17 @@ func _emit_collectible_collected() -> void:
 
 @rpc("authority", "call_local", "reliable")
 func update_collectible_count(new_collected: int, new_total: int) -> void:
+	# Security: Validate counts
+	if new_collected < 0 or new_collected > MAX_COLLECTIBLE_COUNT:
+		push_warning("[GameManager] RPC validation failed: new_collected out of range %d" % new_collected)
+		return
+	if new_total < 0 or new_total > MAX_COLLECTIBLE_COUNT:
+		push_warning("[GameManager] RPC validation failed: new_total out of range %d" % new_total)
+		return
+	if new_collected > new_total:
+		push_warning("[GameManager] RPC validation failed: new_collected (%d) > new_total (%d)" % [new_collected, new_total])
+		return
+
 	collected = new_collected
 	total_collectibles = new_total
 	print("[GameManager] Updated collectible count: %d/%d" % [collected, total_collectibles])
@@ -51,6 +66,22 @@ func update_collectible_count(new_collected: int, new_total: int) -> void:
 
 @rpc("authority", "call_local", "reliable")
 func on_collectible_collected(collectible_id: int, collector_peer_id: int, new_count: int, total: int) -> void:
+	# Security: Validate collectible ID
+	if collectible_id < 0 or collectible_id > MAX_COLLECTIBLE_ID:
+		push_warning("[GameManager] RPC validation failed: collectible_id out of range %d" % collectible_id)
+		return
+
+	# Security: Validate counts
+	if new_count < 0 or new_count > MAX_COLLECTIBLE_COUNT:
+		push_warning("[GameManager] RPC validation failed: new_count out of range %d" % new_count)
+		return
+	if total < 0 or total > MAX_COLLECTIBLE_COUNT:
+		push_warning("[GameManager] RPC validation failed: total out of range %d" % total)
+		return
+	if new_count > total:
+		push_warning("[GameManager] RPC validation failed: new_count (%d) > total (%d)" % [new_count, total])
+		return
+
 	collected = new_count
 	total_collectibles = total
 	print("[GameManager] Collectible %d collected by player %d (%d/%d)" % [collectible_id, collector_peer_id, new_count, total])

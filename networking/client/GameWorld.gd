@@ -103,7 +103,7 @@ func _update_remote_peer_lists() -> void:
 
 func _spawn_position_for(peer_id: int) -> Vector3:
 	var rng := RandomNumberGenerator.new()
-	rng.randomize()
+	rng.seed = peer_id
 	var angle := rng.randf_range(0.0, TAU)
 	var radius := rng.randf_range(2.0, 6.0)
 	return Vector3(cos(angle) * radius, 1.6, sin(angle) * radius)
